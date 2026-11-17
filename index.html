@@ -202,7 +202,7 @@
 
   <div class="sec">
     <div class="sec-h"><h2>الاسم</h2><small id="count"></small></div>
-    <input class="name" id="name" type="text" maxlength="12" autocomplete="off" placeholder="SARA أو سارة" value="SHADEN">
+    <input class="name" id="name" type="text" maxlength="12" autocomplete="off" placeholder="SARA أو سارة" value="">
   </div>
 
   <div class="sec">
@@ -304,16 +304,11 @@ const CONFIG = {
   sizes: [
     { id:"6",  cm:6,  pricePerLetter:12 },
     { id:"8",  cm:8,  pricePerLetter:15 },
-    { id:"10", cm:10, pricePerLetter:19 },
     { id:"12", cm:12, pricePerLetter:24 },
-    { id:"15", cm:15, pricePerLetter:30 },
   ],
   textures: [
     { id:"smooth", label:"ناعم" },
-    { id:"pebble", label:"حصى" },
-    { id:"knit",   label:"تريكو" },
-    { id:"dots",   label:"فقاعات" },
-    { id:"stars",  label:"نجوم", isNew:true },
+    { id:"knit",   label:"مخيوط" },
   ],
   colors: [
     { name:"حليب",    hex:"#ebe7df" },
@@ -350,7 +345,7 @@ const toAr=n=>String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const cur=CONFIG.currency, FS=200;
 
 const state={
-  name:"SHADEN", size:"8", wall:"#f1ece6", sel:-1, cart:0,
+  name:"", size:"8", wall:"#f1ece6", sel:-1, cart:0,
   def:{ tex:"smooth", color:"#b5a497" }, per:[], addons:new Set(), ship:"ship",
 };
 const units=()=>{ const t=state.name.trim(); return !t?[]:(AR.test(t)?t.split(/\s+/):[...t]); };
@@ -591,7 +586,6 @@ $("addBtn").onclick=showOrder;
 $("closeBtn").onclick=()=>$("modal").classList.remove("show");
 $("modal").onclick=e=>{ if(e.target.id==="modal") $("modal").classList.remove("show"); };
 
-state.per=["#bdb39c","#b5a497","#4b3229","#1f1c1e","#b5a497","#4b3229"].map(c=>({color:c}));
 render("all");
 if(document.fonts) document.fonts.ready.then(()=>render());
 window.addEventListener("resize",()=>render());
