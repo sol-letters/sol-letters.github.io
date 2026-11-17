@@ -294,23 +294,21 @@ const CONFIG = {
     { id:"knit",   label:"مخيوط" },
   ],
   colors: [
-    { name:"حليب",    hex:"#ebe7df" },
-    { name:"لاتيه",   hex:"#bdb39c" },
-    { name:"توفي",    hex:"#b5a497" },
-    { name:"شوكولا",  hex:"#4b3229" },
-    { name:"حبر",     hex:"#1f1c1e" },
-    { name:"غزل",     hex:"#f2d3d8" },
-    { name:"باليه",   hex:"#dca7ab", isNew:true },
-    { name:"دمية",    hex:"#f2d6cb", isNew:true },
-    { name:"ياقوت",   hex:"#df4a4f" },
-    { name:"كرز",     hex:"#9e3539" },
-    { name:"عسلي",    hex:"#efd38c" },
-    { name:"فستق",    hex:"#c8c6aa", isNew:true },
-    { name:"أفوكادو", hex:"#d4dfa7", isNew:true },
-    { name:"ماتشا",   hex:"#4b5b36" },
-    { name:"ثلج",     hex:"#a2c6cc" },
-    { name:"سماوي",   hex:"#5a93cd" },
-    { name:"ليلكي",   hex:"#c8b6d8" },
+    { name:"أبيض",       hex:"#f6f6f3" },
+    { name:"أبيض عظمي",  hex:"#ece4cf" },
+    { name:"بلوط",       hex:"#d8bf94" },
+    { name:"بني",        hex:"#4e2b1f" },
+    { name:"رمادي",      hex:"#6d6d70" },
+    { name:"أسود",       hex:"#1c1b1d" },
+    { name:"أحمر",       hex:"#d42a2f" },
+    { name:"زهري",       hex:"#f283b3" },
+    { name:"ماجنتا",     hex:"#d4267f" },
+    { name:"برتقالي",    hex:"#f08a1d" },
+    { name:"أصفر",       hex:"#f4d62c" },
+    { name:"أخضر",       hex:"#33bd4d" },
+    { name:"زيتوني",     hex:"#5b6b2f" },
+    { name:"سماوي",      hex:"#3d94d8" },
+    { name:"أزرق",       hex:"#1f46c8" },
   ],
   walls: ["#f1ece6","#e7dfd3","#f5e4e3","#e2ebef","#e5ebdf","#2b2829"],
   addons: [
@@ -329,7 +327,7 @@ const cur=CONFIG.currency, FS=200;
 
 const state={
   name:"", size:"8", wall:"#f1ece6", sel:-1, cart:0,
-  def:{ tex:"smooth", color:"#b5a497" }, per:[], addons:new Set(), ship:"ship",
+  def:{ tex:"smooth", color:"#d8bf94" }, per:[], addons:new Set(), ship:"ship",
 };
 const units=()=>{ const t=state.name.trim(); return !t?[]:(AR.test(t)?t.split(/\s+/):[...t]); };
 const isRTL=()=>AR.test(state.name);
@@ -424,13 +422,14 @@ function apply(patch){
 }
 
 const PALETTES=[
-  ["#bdb39c","#b5a497","#4b3229","#1f1c1e"],
-  ["#f2d3d8","#a2c6cc","#c8b6d8","#efd38c","#c8c6aa"],
-  ["#9e3539","#dca7ab","#f2d3d8","#f2d6cb","#ebe7df","#efd38c","#c8c6aa","#a2c6cc"],
-  ["#4b5b36","#c8c6aa","#d4dfa7","#ebe7df"],
-  ["#5a93cd","#a2c6cc","#ebe7df","#efd38c"],
-  ["#df4a4f","#efd38c","#5a93cd","#4b5b36","#f2d3d8"],
-];
+  ["#ece4cf","#d8bf94","#4e2b1f","#1c1b1d"],
+  ["#f283b3","#3d94d8","#f4d62c","#33bd4d","#f08a1d"],
+  ["#5b6b2f","#ece4cf","#d8bf94","#4e2b1f"],
+  ["#d4267f","#f283b3","#f6f6f3","#f4d62c"],
+  ["#1f46c8","#3d94d8","#f6f6f3","#f4d62c"],
+  ["#d42a2f","#f08a1d","#f4d62c","#33bd4d","#3d94d8","#1f46c8","#d4267f"],
+  ["#1c1b1d","#6d6d70","#f6f6f3"],
+]
 $("surprise").onclick=()=>{
   const p=PALETTES[Math.floor(Math.random()*PALETTES.length)];
   const off=Math.floor(Math.random()*p.length);
