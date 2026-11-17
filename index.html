@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>صمّمي اسمك | sol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Modak&family=Baloo+Bhaijaan+2:wght@800&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4f0ea; --card:#fffdf9; --ink:#1d1a1b; --muted:#8c847d; --line:#e6dfd5;
+    --accent:#1d1a1b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{font-family:"Tajawal",system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;padding-bottom:96px}
+  button{font:inherit;color:inherit;cursor:pointer}
+
+  /* top bar */
+  .top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;max-width:640px;margin:0 auto}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:17px;letter-spacing:-.2px}
+  .logo svg{width:26px;height:26px}
+  .wordmark{font-family:"Modak",sans-serif;font-weight:400;font-size:30px;line-height:1;letter-spacing:.5px;transform:translateY(2px)}
+  .bag{position:relative;width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+  .bag b{position:absolute;top:-3px;inset-inline-start:-3px;min-width:18px;height:18px;border-radius:9px;background:var(--ink);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 4px}
+
+  .wrap{max-width:640px;margin:0 auto;padding:0 18px}
+
+  /* sticky preview */
+  .preview{position:sticky;top:8px;z-index:5;margin-top:4px}
+  .stage{position:relative;border-radius:28px;overflow:hidden;height:236px;display:flex;align-items:center;justify-content:center;transition:background-color .35s;box-shadow:0 10px 30px -18px rgba(40,25,20,.45),0 0 0 1px rgba(0,0,0,.04)}
+  .stage::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(80% 70% at 20% 0%,rgba(255,255,255,.5),transparent 60%),radial-gradient(100% 80% at 90% 120%,rgba(0,0,0,.10),transparent 60%)}
+  #scene{position:relative;width:100%;height:100%;padding:18px 10px;overflow:visible;direction:ltr}
+  #scene text{cursor:pointer}
+  .pop{transform-box:fill-box;transform-origin:50% 70%;animation:pop .45s cubic-bezier(.3,1.7,.5,1)}
+  @keyframes pop{from{transform:scale(.55) translateY(14%);opacity:0}to{transform:none;opacity:1}}
+  .empty{position:absolute;inset:0;display:grid;place-items:center;color:rgba(0,0,0,.35);font-size:15px}
+  .tag{position:absolute;bottom:12px;inset-inline-start:12px;display:flex;gap:6px;z-index:2}
+  .tag span{background:rgba(255,255,255,.78);backdrop-filter:blur(8px);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
+  .editing{position:absolute;top:12px;inset-inline:12px;z-index:2;display:none;align-items:center;justify-content:space-between;gap:8px;background:var(--ink);color:#fff;border-radius:999px;padding:6px 6px 6px 14px;font-size:13px;font-weight:700}
+  .editing.show{display:flex}
+  .editing .ch{font-family:"Modak","Baloo Bhaijaan 2";font-weight:400;font-size:18px;line-height:1;margin-inline:4px}
+  .editing button{border:0;background:#fff;color:var(--ink);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800}
+  .hint{font-size:12.5px;color:var(--muted);text-align:center;margin:10px 0 0}
+
+  /* sections */
+  h1{font-size:28px;font-weight:900;margin:26px 0 2px;letter-spacing:-.5px}
+  .from{color:var(--muted);font-size:15px;margin:0}
+  .sec{margin-top:26px}
+  .sec-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+  .sec-h h2{font-size:17px;font-weight:900;margin:0}
+  .sec-h small{color:var(--muted);font-size:13px}
+  .name{width:100%;font:inherit;font-size:22px;font-weight:700;padding:16px 18px;border:0;border-radius:18px;background:var(--card);box-shadow:0 0 0 1.5px var(--line) inset;outline:none;letter-spacing:.5px}
+  .name:focus{box-shadow:0 0 0 2px var(--ink) inset}
+
+  .pills{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{border:0;background:var(--card);box-shadow:0 0 0 1.5px var(--line) inset;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+  .pill.on{background:var(--ink);color:#fff;box-shadow:none}
+  .pill .sub{font-weight:500;font-size:12px;opacity:.6}
+  .pill .dot{width:22px;height:22px;border-radius:50%;flex:0 0 auto}
+  .new{background:#efe3b8;color:#6c5622;font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:6px}
+  .pill.on .new{background:#fff3;color:#fff}
+
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:14px 6px}
+  .sw{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+  .sw i{position:relative;width:46px;height:46px;border-radius:50%;box-shadow:inset 0 -5px 8px rgba(0,0,0,.12),inset 0 4px 6px rgba(255,255,255,.35),0 0 0 1px rgba(0,0,0,.06);transition:transform .15s}
+  .sw.on{color:var(--ink)}
+  .sw.on i{transform:scale(1.06);box-shadow:inset 0 -5px 8px rgba(0,0,0,.12),inset 0 4px 6px rgba(255,255,255,.35),0 0 0 3px var(--paper),0 0 0 5px var(--ink)}
+  .sw .new{position:absolute;top:-6px;inset-inline-end:-12px}
+
+  .walls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .wall{width:38px;height:38px;border-radius:12px;border:0;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+  .wall.on{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--ink)}
+  .wall.any{position:relative;overflow:hidden;background:conic-gradient(#f6b,#fd6,#9e9,#8cf,#c9f,#f6b)}
+  .wall.any input{position:absolute;inset:-10px;width:70px;height:70px;opacity:0;cursor:pointer}
+
+  .surprise{width:100%;margin-top:26px;border:0;border-radius:18px;padding:16px;font-weight:900;font-size:16px;background:var(--card);box-shadow:0 0 0 1.5px var(--line) inset}
+  .surprise:active{transform:scale(.98)}
+
+  .addon{width:100%;display:flex;align-items:center;gap:12px;border:0;background:var(--card);box-shadow:0 0 0 1.5px var(--line) inset;border-radius:16px;padding:13px 14px;margin-bottom:8px;text-align:start}
+  .addon.on{box-shadow:0 0 0 2px var(--ink) inset}
+  .addon .box{width:22px;height:22px;border-radius:7px;box-shadow:0 0 0 1.5px #cfc6bb inset;display:grid;place-items:center;color:#fff;font-size:13px;flex:0 0 auto}
+  .addon.on .box{background:var(--ink);box-shadow:none}
+  .box.radio{border-radius:50%}
+  .addon.on .box.radio{background:#fff;box-shadow:inset 0 0 0 6px var(--ink)}
+  .free{color:#2f7a4a;font-weight:800}
+  .addon .t{flex:1;font-weight:700;font-size:15px}
+  .addon .t small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+  .addon .p{font-size:13px;color:var(--muted);font-weight:700}
+
+  .bill{background:var(--card);border-radius:18px;box-shadow:0 0 0 1.5px var(--line) inset;padding:14px 16px}
+  .bill .r{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;font-size:15px}
+  .bill .r span{color:var(--muted)}
+  .bill .r b{font-weight:800}
+  .bill .t{border-top:1.5px dashed var(--line);margin-top:6px;padding-top:12px;font-size:19px}
+  .bill .t span{color:var(--ink);font-weight:900}
+  .bill .ship{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
+  .pill .sub{display:block}
+  #sizes .pill{flex-direction:column;gap:0;padding:9px 16px;line-height:1.3}
+  .form{display:flex;flex-direction:column;gap:10px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  #addrBox{display:flex;flex-direction:column;gap:10px}
+  #addrBox .two{margin-bottom:0}
+  .fld{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+  .fld i{color:#c0392b;font-style:normal}
+  .fld input{font:inherit;font-size:16px;font-weight:500;color:var(--ink);padding:13px 14px;border:0;border-radius:14px;background:var(--card);box-shadow:0 0 0 1.5px var(--line) inset;outline:none;width:100%}
+  .fld input:focus{box-shadow:0 0 0 2px var(--ink) inset}
+  .fld input.bad{box-shadow:0 0 0 2px #c0392b inset}
+  .err{color:#c0392b;font-size:13px;font-weight:700;min-height:0}
+  .fine{font-size:12px;color:var(--muted);line-height:1.7;margin:22px 0 0}
+
+  /* sticky buy bar */
+  .buybar{position:fixed;bottom:0;inset-inline:0;z-index:10;background:rgba(244,240,234,.9);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:12px 18px calc(12px + env(safe-area-inset-bottom))}
+  .buybar .in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .total small{display:block;color:var(--muted);font-size:12px}
+  .total b{font-size:22px;font-weight:900}
+  .add{flex:1;border:0;border-radius:999px;background:var(--ink);color:#fff;font-weight:900;font-size:17px;padding:16px}
+  .add:disabled{opacity:.3}
+
+  .modal{position:fixed;inset:0;background:rgba(29,26,27,.45);display:none;align-items:flex-end;justify-content:center;z-index:20;padding:12px}
+  .modal.show{display:flex}
+  .sheet{background:var(--card);border-radius:26px;max-width:460px;width:100%;padding:22px;animation:up .25s ease;max-height:88vh;overflow:auto}
+  @keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+  .sheet h3{margin:0 0 4px;font-size:21px;font-weight:900}
+  .sheet pre{white-space:pre-wrap;font-family:inherit;background:var(--paper);border-radius:16px;padding:14px;font-size:14px;line-height:1.85;margin:12px 0}
+  .btns{display:flex;gap:8px}
+  .btns button{flex:1;font-weight:800;padding:13px;border-radius:999px;border:0;box-shadow:0 0 0 1.5px var(--line) inset;background:#fff}
+  .btns .pri{background:var(--ink);color:#fff;box-shadow:none}
+  .btns .go{flex:1.6;display:grid;place-items:center;text-decoration:none;font-weight:800;padding:13px;border-radius:999px;font-size:15px}
+  .btns .wa{background:#1fa855;gap:8px;display:flex;align-items:center;justify-content:center}
+  .steps{margin:0 0 14px;padding-inline-start:20px;font-size:14px;line-height:1.9}
+  .steps b{font-weight:800}
+  .copied{text-align:center;font-size:12px;color:var(--muted);margin-top:10px;min-height:18px;font-weight:700}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs id="defs">
+    <!-- matte, softly inflated plastic -->
+    <filter id="puff" x="-40%" y="-40%" width="180%" height="190%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="11" result="h"/>
+      <feDiffuseLighting in="h" surfaceScale="9" diffuseConstant="1" lighting-color="#fff" result="dif">
+        <feDistantLight azimuth="240" elevation="60"/>
+      </feDiffuseLighting>
+      <feComposite in="SourceGraphic" in2="dif" operator="arithmetic" k1=".62" k2=".42" result="shaded"/>
+      <feSpecularLighting in="h" surfaceScale="9" specularConstant=".16" specularExponent="12" lighting-color="#fff" result="spec">
+        <feDistantLight azimuth="240" elevation="64"/>
+      </feSpecularLighting>
+      <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
+      <feMorphology in="SourceAlpha" operator="erode" radius="8" result="inner"/>
+      <feColorMatrix in="SourceGraphic" type="luminanceToAlpha" result="lum"/>
+      <feGaussianBlur in="lum" stdDeviation="1.2" result="lumb"/>
+      <feSpecularLighting in="lumb" surfaceScale="4" specularConstant=".45" specularExponent="12" lighting-color="#fff" result="tspec">
+        <feDistantLight azimuth="240" elevation="45"/>
+      </feSpecularLighting>
+      <feComposite in="tspec" in2="inner" operator="in" result="tspecIn"/>
+      <feComposite in="shaded" in2="specIn" operator="arithmetic" k2="1" k3="1" result="l1"/>
+      <feComposite in="l1" in2="tspecIn" operator="arithmetic" k2="1" k3=".7" result="l2"/>
+      <feComposite in="l2" in2="SourceAlpha" operator="in" result="letter"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="sb"/>
+      <feOffset in="sb" dx="8" dy="14" result="so"/>
+      <feFlood flood-color="#2a1d17" flood-opacity=".22"/>
+      <feComposite in2="so" operator="in" result="shadow"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="cb"/>
+      <feOffset in="cb" dx="2" dy="4" result="co"/>
+      <feFlood flood-color="#2a1d17" flood-opacity=".2"/>
+      <feComposite in2="co" operator="in" result="contact"/>
+      <feMerge><feMergeNode in="shadow"/><feMergeNode in="contact"/><feMergeNode in="letter"/></feMerge>
+    </filter>
+  </defs>
+</svg>
+
+<div class="top">
+  <div class="logo" dir="ltr">
+    <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="6.5" fill="#e9a23b"/><g stroke="#e9a23b" stroke-width="2.6" stroke-linecap="round"><path d="M16 2.5v4M16 25.5v4M2.5 16h4M25.5 16h4M6.5 6.5l2.8 2.8M22.7 22.7l2.8 2.8M6.5 25.5l2.8-2.8M22.7 9.3l2.8-2.8"/></g></svg>
+    <span class="wordmark">sol</span>
+  </div>
+  <div class="bag" aria-label="السلة">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d1a1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="preview">
+    <div class="stage" id="stage">
+      <div class="editing" id="editing">
+        <span>تعدّلين الحرف <span class="ch" id="editCh"></span> لحاله</span>
+        <button id="doneEdit">كل الحروف</button>
+      </div>
+      <svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="empty" id="empty">اكتبي الاسم ويطلع هنا ✨</div>
+      <div class="tag"><span id="tagSize"></span><span id="tagCount"></span></div>
+    </div>
+    <p class="hint" id="hint"></p>
+  </div>
+
+  <h1>صمّمي اسمك</h1>
+  <p class="from" id="from"></p>
+
+  <div class="sec">
+    <div class="sec-h"><h2>الاسم</h2><small id="count"></small></div>
+    <input class="name" id="name" type="text" maxlength="12" autocomplete="off" placeholder="SARA أو سارة" value="SHADEN">
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>ارتفاع الحرف</h2><small>السعر لكل حرف</small></div>
+    <div class="pills" id="sizes"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>الملمس</h2><small id="texScope"></small></div>
+    <div class="pills" id="textures"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>اللون</h2><small id="colName"></small></div>
+    <div class="swatches" id="colors"></div>
+  </div>
+
+  <button class="surprise" id="surprise">🎲 فاجئيني بتنسيق ألوان</button>
+
+  <div class="sec">
+    <div class="sec-h"><h2>لون الجدار في المعاينة</h2></div>
+    <div class="walls" id="walls"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>إضافات</h2></div>
+    <div id="addons"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>التوصيل</h2><small id="freeHint"></small></div>
+    <div id="shipping"></div>
+  </div>
+
+  <div class="sec" id="custSec">
+    <div class="sec-h"><h2>بياناتك</h2><small>عشان نوصّل لك طلبك</small></div>
+    <div class="form">
+      <label class="fld"><span>الاسم <i>*</i></span><input id="cName" type="text" autocomplete="name" placeholder="اسمك الكامل"></label>
+      <label class="fld"><span>رقم الجوال <i>*</i></span><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="05XXXXXXXX"></label>
+      <div id="addrBox">
+        <div class="two">
+          <label class="fld"><span>المدينة <i>*</i></span><input id="cCity" type="text" autocomplete="address-level2" placeholder="مثال: الرياض"></label>
+          <label class="fld"><span>الحي <i>*</i></span><input id="cDist" type="text" placeholder="مثال: النرجس"></label>
+        </div>
+        <label class="fld"><span>الشارع ورقم البيت</span><input id="cStreet" type="text" autocomplete="street-address" placeholder="اختياري"></label>
+        <label class="fld"><span>العنوان الوطني المختصر</span><input id="cShort" type="text" dir="ltr" placeholder="مثال: RRRD2929 (اختياري)"></label>
+      </div>
+      <label class="fld"><span>ملاحظات</span><input id="cNote" type="text" placeholder="أي شي تبين نعرفه (اختياري)"></label>
+      <div class="err" id="err"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>تفاصيل السعر</h2></div>
+    <div class="bill" id="bill"></div>
+  </div>
+
+  <p class="fine">المعاينة توضيحية، والألوان في القطعة الحقيقية ممكن تختلف شوي حسب الإضاءة والشاشة. كل قطعة تنطبع لك خصيصًا والتجهيز من ٥ إلى ٧ أيام.</p>
+</div>
+
+<div class="buybar">
+  <div class="in">
+    <div class="total"><small id="totalSub">الإجمالي</small><b id="total"></b></div>
+    <button class="add" id="addBtn">اطلبي عبر واتساب</button>
+  </div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <h3>تصميمك جاهز 🎉</h3>
+    <div style="color:var(--muted);font-size:14px">هذا ملخص طلبك، أرسليه لنا على واتساب ونرسل لك رابط الدفع:</div>
+    <pre id="orderText"></pre>
+    <div class="btns">
+      <button id="closeBtn">رجوع للتصميم</button>
+      <a class="pri go wa" id="goBtn" href="#" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3c-.2.3-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 1.9 2.9 4.6 4 1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.5-.3z"/></svg>
+        أرسلي الطلب على واتساب</a>
+    </div>
+    <div class="copied" id="waNote">رقمنا: <span id="waNum" dir="ltr"></span></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   الإعدادات: الأسعار والألوان والملمس (عدّليها من هنا)
+   ========================================================= */
+const CONFIG = {
+  currency: "ر.س",
+  maxLetters: 12,
+  // رقم واتساب المتجر بالصيغة الدولية بدون + ولا مسافات (مثال: 9665XXXXXXXX)
+  whatsapp: "966567466167",
+  // طرق التوصيل وأسعارها (عدّليها حسب شركة الشحن عندك)
+  shipping: [
+    { id:"ship",   label:"شحن لكل مدن المملكة", note:"يوصلك خلال ٢ إلى ٤ أيام بعد التجهيز", price:25 },
+    { id:"pickup", label:"استلام من عندنا",     note:"نرسل لك الموقع في واتساب",          price:0 },
+  ],
+  // شحن مجاني إذا تعدّى سعر الحروف هذا المبلغ (حطي 0 لإلغائه)
+  freeShippingOver: 200,
+  sizes: [
+    { id:"6",  cm:6,  pricePerLetter:12 },
+    { id:"8",  cm:8,  pricePerLetter:15 },
+    { id:"10", cm:10, pricePerLetter:19 },
+    { id:"12", cm:12, pricePerLetter:24 },
+    { id:"15", cm:15, pricePerLetter:30 },
+  ],
+  textures: [
+    { id:"smooth", label:"ناعم" },
+    { id:"pebble", label:"حصى" },
+    { id:"knit",   label:"تريكو" },
+    { id:"dots",   label:"فقاعات" },
+    { id:"stars",  label:"نجوم", isNew:true },
+  ],
+  colors: [
+    { name:"حليب",    hex:"#ebe7df" },
+    { name:"لاتيه",   hex:"#bdb39c" },
+    { name:"توفي",    hex:"#b5a497" },
+    { name:"شوكولا",  hex:"#4b3229" },
+    { name:"حبر",     hex:"#1f1c1e" },
+    { name:"غزل",     hex:"#f2d3d8" },
+    { name:"باليه",   hex:"#dca7ab", isNew:true },
+    { name:"دمية",    hex:"#f2d6cb", isNew:true },
+    { name:"ياقوت",   hex:"#df4a4f" },
+    { name:"كرز",     hex:"#9e3539" },
+    { name:"عسلي",    hex:"#efd38c" },
+    { name:"فستق",    hex:"#c8c6aa", isNew:true },
+    { name:"أفوكادو", hex:"#d4dfa7", isNew:true },
+    { name:"ماتشا",   hex:"#4b5b36" },
+    { name:"ثلج",     hex:"#a2c6cc" },
+    { name:"سماوي",   hex:"#5a93cd" },
+    { name:"ليلكي",   hex:"#c8b6d8" },
+  ],
+  walls: ["#f1ece6","#e7dfd3","#f5e4e3","#e2ebef","#e5ebdf","#2b2829"],
+  addons: [
+    { id:"stand", label:"قاعدة وقوف", note:"توقف الحروف على الرف", price:15 },
+    { id:"tape",  label:"لاصق جداري", note:"تعلّقينها بدون مسامير", price:6 },
+    { id:"gift",  label:"تغليف هدية + كرت", note:"نكتب إهداءك على الكرت", price:10 },
+  ],
+};
+
+/* ========================================================= */
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+const AR=/[؀-ۿ]/;
+const toAr=n=>String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+const cur=CONFIG.currency, FS=200;
+
+const state={
+  name:"SHADEN", size:"8", wall:"#f1ece6", sel:-1, cart:0,
+  def:{ tex:"smooth", color:"#b5a497" }, per:[], addons:new Set(), ship:"ship",
+};
+const units=()=>{ const t=state.name.trim(); return !t?[]:(AR.test(t)?t.split(/\s+/):[...t]); };
+const isRTL=()=>AR.test(state.name);
+const styleOf=i=>({ ...state.def, ...(state.per[i]||{}) });
+const colorName=h=>CONFIG.colors.find(c=>c.hex===h)?.name||"";
+const texName=id=>CONFIG.textures.find(t=>t.id===id)?.label||"";
+
+function rgb(h){ const n=parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function mix(h,t){ const [r,g,b]=rgb(h),f=c=>t<0?Math.round(c*(1+t)):Math.round(c+(255-c)*t); return `rgb(${f(r)},${f(g)},${f(b)})`; }
+function luma(h){ const [r,g,b]=rgb(h); return r*.299+g*.587+b*.114; }
+
+/* texture patterns (SVG units at FS=200) */
+function star(x,y,r){ let p=""; for(let i=0;i<10;i++){ const a=Math.PI/5*i-Math.PI/2,rr=i%2?r*.45:r; p+=`${(x+rr*Math.cos(a)).toFixed(1)},${(y+rr*Math.sin(a)).toFixed(1)} `;} return p; }
+function patternSVG(tex,hex){
+  const hi=mix(hex,.28), lo=mix(hex,-.1);
+  switch(tex){
+    case "stars": return {w:70,h:70,body:`<rect width="70" height="70" fill="${hex}"/><g fill="${hi}"><polygon points="${star(18,18,9)}"/><polygon points="${star(52,50,6)}"/><path d="M52 6a10 10 0 1 0 10 14a8 8 0 1 1-10-14z"/><path d="M12 46a7 7 0 1 0 7 10a5.6 5.6 0 1 1-7-10z"/></g>`};
+    case "knit": return {w:22,h:20,body:`<rect width="22" height="20" fill="${hex}"/><path d="M2 0 Q6 11 11 17 M20 0 Q16 11 11 17" stroke="${lo}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M2.5 -1 Q6 9.5 10.5 15 M19.5 -1 Q16 9.5 11.5 15" stroke="${hi}" stroke-width="3" fill="none" stroke-linecap="round"/>`};
+    case "dots": return {w:24,h:24,body:`<rect width="24" height="24" fill="${hex}"/><g fill="${hi}"><circle cx="6" cy="6" r="4.2"/><circle cx="18" cy="18" r="4.2"/></g>`};
+    case "pebble": return {w:60,h:60,body:`<rect width="60" height="60" fill="${hex}"/><g fill="${lo}"><ellipse cx="12" cy="13" rx="9" ry="6.5"/><ellipse cx="39" cy="9" rx="7" ry="5"/><ellipse cx="49" cy="33" rx="9" ry="6.5"/><ellipse cx="21" cy="39" rx="10" ry="7"/><ellipse cx="44" cy="54" rx="7" ry="5"/><ellipse cx="5" cy="55" rx="6" ry="4"/></g><g fill="${hi}" opacity=".6"><ellipse cx="11" cy="11" rx="4" ry="2"/><ellipse cx="38" cy="7.5" rx="3" ry="1.6"/><ellipse cx="48" cy="31" rx="4" ry="2"/><ellipse cx="20" cy="37" rx="4.5" ry="2.2"/></g>`};
+    default: return {w:10,h:10,body:`<rect width="10" height="10" fill="${hex}"/>`};
+  }
+}
+const pats={};
+function pat(tex,hex){
+  const id=`p-${tex}-${hex.slice(1)}`;
+  if(!pats[id]){ const p=patternSVG(tex,hex), el=document.createElementNS(NS,"pattern");
+    el.setAttribute("id",id); el.setAttribute("patternUnits","userSpaceOnUse"); el.setAttribute("width",p.w); el.setAttribute("height",p.h);
+    el.innerHTML=p.body; $("defs").appendChild(el); pats[id]=1; }
+  return `url(#${id})`;
+}
+
+/* build controls */
+CONFIG.sizes.forEach(s=>{
+  const b=document.createElement("button"); b.className="pill"; b.dataset.id=s.id;
+  b.innerHTML=`<span>${toAr(s.cm)} سم</span><span class="sub">${toAr(s.pricePerLetter)} ${cur}/حرف</span>`;
+  b.onclick=()=>{ state.size=s.id; render(); }; $("sizes").appendChild(b);
+});
+CONFIG.textures.forEach(t=>{
+  const b=document.createElement("button"); b.className="pill"; b.dataset.id=t.id;
+  b.innerHTML=`${t.label}${t.isNew?'<span class="new">جديد</span>':''}`;
+  b.onclick=()=>apply({tex:t.id}); $("textures").appendChild(b);
+});
+CONFIG.colors.forEach(c=>{
+  const b=document.createElement("button"); b.className="sw"; b.dataset.hex=c.hex;
+  b.innerHTML=`<i style="background:${c.hex}">${c.isNew?'<span class="new">جديد</span>':''}</i>${c.name}`;
+  b.onclick=()=>apply({color:c.hex}); $("colors").appendChild(b);
+});
+CONFIG.walls.forEach(h=>{
+  const b=document.createElement("button"); b.className="wall"; b.style.background=h; b.dataset.hex=h;
+  b.onclick=()=>{ state.wall=h; render(); }; $("walls").appendChild(b);
+});
+const any=document.createElement("label"); any.className="wall any"; any.title="أي لون";
+any.innerHTML=`<input type="color" value="#f1ece6">`; $("walls").appendChild(any);
+any.querySelector("input").oninput=e=>{ state.wall=e.target.value; render(); };
+CONFIG.addons.forEach(a=>{
+  const b=document.createElement("button"); b.className="addon"; b.dataset.id=a.id;
+  b.innerHTML=`<span class="box">✓</span><span class="t">${a.label}<small>${a.note}</small></span><span class="p">+${toAr(a.price)} ${cur}</span>`;
+  b.onclick=()=>{ state.addons.has(a.id)?state.addons.delete(a.id):state.addons.add(a.id); render(); };
+  $("addons").appendChild(b);
+});
+
+CONFIG.shipping.forEach(o=>{
+  const b=document.createElement("button"); b.className="addon ship"; b.dataset.id=o.id;
+  b.innerHTML=`<span class="box radio"></span><span class="t">${o.label}<small>${o.note}</small></span><span class="p" data-p></span>`;
+  b.onclick=()=>{ state.ship=o.id; render(); }; $("shipping").appendChild(b);
+});
+$("name").addEventListener("input",e=>{
+  const old=units().length; state.name=e.target.value;
+  const n=units().length; state.per.length=Math.min(state.per.length,n);
+  if(state.sel>=n) state.sel=-1;
+  render(n>old?n-1:null);
+});
+$("doneEdit").onclick=()=>{ state.sel=-1; render(); };
+
+function apply(patch){
+  if(state.sel>=0){ state.per[state.sel]={...(state.per[state.sel]||{}),...patch}; render(state.sel); }
+  else{
+    state.def={...state.def,...patch};
+    state.per=state.per.map(p=>{ if(!p) return p; const q={...p}; Object.keys(patch).forEach(k=>delete q[k]); return q; });
+    render("all");
+  }
+}
+
+const PALETTES=[
+  ["#bdb39c","#b5a497","#4b3229","#1f1c1e"],
+  ["#f2d3d8","#a2c6cc","#c8b6d8","#efd38c","#c8c6aa"],
+  ["#9e3539","#dca7ab","#f2d3d8","#f2d6cb","#ebe7df","#efd38c","#c8c6aa","#a2c6cc"],
+  ["#4b5b36","#c8c6aa","#d4dfa7","#ebe7df"],
+  ["#5a93cd","#a2c6cc","#ebe7df","#efd38c"],
+  ["#df4a4f","#efd38c","#5a93cd","#4b5b36","#f2d3d8"],
+];
+$("surprise").onclick=()=>{
+  const p=PALETTES[Math.floor(Math.random()*PALETTES.length)];
+  const off=Math.floor(Math.random()*p.length);
+  const tex=CONFIG.textures[Math.floor(Math.random()*CONFIG.textures.length)].id;
+  state.def={tex,color:p[off]}; state.sel=-1;
+  state.per=units().map((_,i)=>({color:p[(i+off)%p.length]}));
+  render("all");
+};
+
+function price(){
+  const sz=CONFIG.sizes.find(s=>s.id===state.size);
+  const n=[...state.name.replace(/\s/g,"")].length;
+  const add=CONFIG.addons.filter(a=>state.addons.has(a.id));
+  const letters=n*sz.pricePerLetter;
+  const sub=letters+add.reduce((s,a)=>s+a.price,0);
+  const so=CONFIG.shipping.find(o=>o.id===state.ship);
+  const free=CONFIG.freeShippingOver>0 && letters>=CONFIG.freeShippingOver;
+  const ship=(free||!n)?0:so.price;
+  return { sz, n, add, letters, so, ship, free, total:sub+ship };
+}
+
+/* the scene */
+function draw(animate){
+  const svg=$("scene"), U=units(), rtl=isRTL();
+  svg.innerHTML="";
+  $("empty").style.display=U.length?"none":"";
+  if(!U.length) return;
+  const fam=rtl?"'Baloo Bhaijaan 2',sans-serif":"'Modak','Baloo Bhaijaan 2',sans-serif";
+  const weight=rtl?"800":"400";
+  const stroke=rtl?FS*.12:FS*.03;
+  const gap=rtl?FS*.14:-FS*.035;
+  const items=U.map((u,i)=>{
+    if(u===" ") return {space:true,w:FS*.3};
+    const g=document.createElementNS(NS,"g"), t=document.createElementNS(NS,"text");
+    t.textContent=u;
+    t.setAttribute("font-family",fam); t.setAttribute("font-weight",weight); t.setAttribute("font-size",FS); t.setAttribute("y",FS);
+    const s=styleOf(i), fu=pat(s.tex,s.color);
+    t.setAttribute("fill",fu); t.setAttribute("stroke",fu); t.setAttribute("stroke-width",stroke); t.setAttribute("stroke-linejoin","round");
+    t.setAttribute("filter","url(#puff)");
+    if(animate==="all"||animate===i) t.classList.add("pop");
+    t.addEventListener("click",()=>{ state.sel = state.sel===i ? -1 : i; render(); });
+    g.appendChild(t); svg.appendChild(g);
+    return {g,t,i,w:t.getBBox().width};
+  });
+  const order=rtl?[...items].reverse():items;
+  let x=0,minY=1e9,maxY=-1e9;
+  order.forEach(it=>{
+    if(it.space){ x+=it.w; return; }
+    it.t.setAttribute("x",x);
+    const bb=it.t.getBBox();
+    minY=Math.min(minY,bb.y); maxY=Math.max(maxY,bb.y+bb.height);
+    const cx=bb.x+bb.width/2, cy=bb.y+bb.height/2, sel=state.sel===it.i;
+    const rot=(((it.i*37+11)%7)-3)*1.1 + (sel?-5:0);
+    const lift=sel?-FS*.08:(((it.i*53)%5)-2)*FS*.01;
+    it.g.setAttribute("transform",`translate(0 ${lift}) rotate(${rot} ${cx} ${cy})`);
+    if(state.sel>=0 && !sel) it.g.setAttribute("opacity",".55");
+    x+=it.w+gap;
+  });
+  const total=x-gap, px=FS*.22, pt=FS*.16, pb=FS*.3;
+  svg.setAttribute("viewBox",`${-px} ${minY-pt} ${total+px*2} ${maxY-minY+pt+pb}`);
+}
+
+function render(animate){
+  const U=units(), rtl=isRTL(), {sz,n,add,so,ship,free,total}=price();
+  $("stage").style.backgroundColor=state.wall;
+  draw(animate);
+
+  const one=state.sel>=0;
+  $("editing").classList.toggle("show",one);
+  if(one) $("editCh").textContent=U[state.sel];
+  $("hint").textContent = U.length ? (rtl?"اضغطي على أي كلمة عشان تلوّنينها لحالها":"اضغطي على أي حرف عشان تلوّنينه لحاله") : "";
+  $("tagSize").textContent=`${toAr(sz.cm)} سم`;
+  $("tagCount").textContent=`${toAr(n)} ${n===1?"حرف":"حروف"}`;
+  $("count").textContent=`${toAr([...state.name].length)} / ${toAr(CONFIG.maxLetters)}`;
+  $("from").textContent=`يبدأ من ${toAr(Math.min(...CONFIG.sizes.map(s=>s.pricePerLetter)))} ${cur} للحرف · ${toAr(sz.pricePerLetter)} ${cur} للحرف بمقاس ${toAr(sz.cm)} سم`;
+
+  const cs=one?styleOf(state.sel):state.def;
+  document.querySelectorAll("#sizes .pill").forEach(b=>b.classList.toggle("on",b.dataset.id===state.size));
+  document.querySelectorAll("#textures .pill").forEach(b=>b.classList.toggle("on",b.dataset.id===cs.tex));
+  document.querySelectorAll(".sw").forEach(b=>b.classList.toggle("on",b.dataset.hex===cs.color));
+  document.querySelectorAll(".wall:not(.any)").forEach(b=>b.classList.toggle("on",b.dataset.hex===state.wall));
+  document.querySelectorAll(".addon").forEach(b=>b.classList.toggle("on",state.addons.has(b.dataset.id)));
+  $("texScope").textContent = one ? `للحرف ${U[state.sel]}` : "لكل الحروف";
+  $("colName").textContent = colorName(cs.color);
+
+  $("total").textContent=`${toAr(total)} ${cur}`;
+  $("totalSub").textContent = n ? `${toAr(n)} ${n===1?"حرف":"حروف"} × ${toAr(sz.pricePerLetter)} ${cur}${add.length?" + إضافات":""}${ship?" + توصيل":""}` : "الإجمالي";
+  const shipTxt = free ? `<b class="free">مجاني</b>` : (ship ? `<b>${toAr(ship)} ${cur}</b>` : `<b>بدون</b>`);
+  $("bill").innerHTML = `
+    <div class="r"><span>${toAr(n)} ${n===1?"حرف":"حروف"} × ${toAr(sz.pricePerLetter)} ${cur} (مقاس ${toAr(sz.cm)} سم)</span><b>${toAr(n*sz.pricePerLetter)} ${cur}</b></div>
+    ${add.map(a=>`<div class="r"><span>${a.label}</span><b>${toAr(a.price)} ${cur}</b></div>`).join("")}
+    <div class="r"><span>التوصيل (${so.label})</span>${shipTxt}</div>
+    <div class="r t"><span>الإجمالي</span><b>${toAr(total)} ${cur}</b></div>`;
+  $("addrBox").style.display = state.ship==="pickup" ? "none" : "";
+  document.querySelectorAll(".addon.ship").forEach(b=>{
+    const o=CONFIG.shipping.find(x=>x.id===b.dataset.id);
+    b.classList.toggle("on",b.dataset.id===state.ship);
+    b.querySelector("[data-p]").innerHTML = o.price===0 ? "مجاني" : (free ? `<span class="free">مجاني</span>` : `${toAr(o.price)} ${cur}`);
+  });
+  const left = CONFIG.freeShippingOver - n*sz.pricePerLetter;
+  $("freeHint").innerHTML = CONFIG.freeShippingOver>0 ? (free ? `<span class="free">🎉 شحنك مجاني</span>` : `شحن مجاني فوق ${toAr(CONFIG.freeShippingOver)} ${cur}`) : "";
+  $("addBtn").disabled=n===0;
+}
+
+function orderText(){
+  const U=units(), {sz,n,add,so,ship,free,total}=price();
+  const v=id=>$(id).value.trim();
+  const C=[`👤 بيانات العميل:`,`الاسم: ${v("cName")}`,`الجوال: ${v("cPhone")}`];
+  if(state.ship!=="pickup"){
+    C.push(`المدينة: ${v("cCity")}`,`الحي: ${v("cDist")}`);
+    if(v("cStreet")) C.push(`الشارع: ${v("cStreet")}`);
+    if(v("cShort")) C.push(`العنوان المختصر: ${v("cShort")}`);
+  }
+  if(v("cNote")) C.push(`ملاحظات: ${v("cNote")}`);
+  const L=[`السلام عليكم، أبي أطلب حروف اسم ✨`,``,`🔤 الاسم على الحروف: ${state.name.trim()}`,`الارتفاع: ${toAr(sz.cm)} سم`,`عدد الحروف: ${toAr(n)}`,``,`${isRTL()?"الكلمات":"الحروف"}:`];
+  U.forEach((u,i)=>{ if(u===" ") return; const st=styleOf(i); L.push(`• ${u}: ${colorName(st.color)} - ${texName(st.tex)}`); });
+  L.push(``,`السعر:`,`• ${toAr(n)} حروف × ${toAr(sz.pricePerLetter)} ${cur} = ${toAr(n*sz.pricePerLetter)} ${cur}`);
+  add.forEach(a=>L.push(`• ${a.label}: ${toAr(a.price)} ${cur}`));
+  L.push(`• التوصيل (${so.label}): ${free?"مجاني":(ship?toAr(ship)+" "+cur:"بدون")}`);
+  L.push(`الإجمالي: ${toAr(total)} ${cur}`);
+  L.push(``,...C);
+  return L.join("\n");
+}
+function validate(){
+  const need=["cName","cPhone"].concat(state.ship!=="pickup"?["cCity","cDist"]:[]);
+  let firstBad=null;
+  ["cName","cPhone","cCity","cDist"].forEach(id=>$(id).classList.remove("bad"));
+  need.forEach(id=>{ if(!$(id).value.trim()){ $(id).classList.add("bad"); firstBad=firstBad||id; } });
+  const ph=$("cPhone").value.replace(/[\s-]/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
+  if(ph && !/^(\+?966|0)?5\d{8}$/.test(ph)){ $("cPhone").classList.add("bad"); firstBad=firstBad||"cPhone"; $("err").textContent="رقم الجوال لازم يكون سعودي، مثل 05XXXXXXXX"; }
+  else $("err").textContent = firstBad ? "عبّي الخانات اللي عليها نجمة *" : "";
+  if(firstBad){ $(firstBad).scrollIntoView({behavior:"smooth",block:"center"}); $(firstBad).focus({preventScroll:true}); return false; }
+  return true;
+}
+function showOrder(){
+  if(!validate()) return;
+  const t=orderText();
+  $("orderText").textContent=t;
+  $("goBtn").href=`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(t)}`;
+  $("waNum").textContent="+"+CONFIG.whatsapp;
+  $("modal").classList.add("show");
+}
+$("addBtn").onclick=showOrder;
+["cName","cPhone","cCity","cDist"].forEach(id=>$(id).addEventListener("input",()=>{ $(id).classList.remove("bad"); }));
+$("closeBtn").onclick=()=>$("modal").classList.remove("show");
+$("modal").onclick=e=>{ if(e.target.id==="modal") $("modal").classList.remove("show"); };
+
+state.per=["#bdb39c","#b5a497","#4b3229","#1f1c1e","#b5a497","#4b3229"].map(c=>({color:c}));
+render("all");
+if(document.fonts) document.fonts.ready.then(()=>render());
+window.addEventListener("resize",()=>render());
+</script>
+</body>
+</html>
