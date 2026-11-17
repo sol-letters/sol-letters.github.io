@@ -54,6 +54,10 @@
   .sec-h small{color:var(--muted);font-size:13px}
   .name{width:100%;font:inherit;font-size:22px;font-weight:700;padding:16px 18px;border:0;border-radius:18px;background:var(--card);box-shadow:0 0 0 1.5px var(--line) inset;outline:none;letter-spacing:.5px}
   .name:focus{box-shadow:0 0 0 2px var(--ink) inset}
+  .name{text-transform:uppercase;text-align:left}
+  .name::placeholder{text-transform:none}
+  .name-hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .name-hint.warn{color:#c0392b;font-weight:700}
 
   .pills{display:flex;flex-wrap:wrap;gap:8px}
   .pill{border:0;background:var(--card);box-shadow:0 0 0 1.5px var(--line) inset;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
@@ -202,7 +206,8 @@
 
   <div class="sec">
     <div class="sec-h"><h2>الاسم</h2><small id="count"></small></div>
-    <input class="name" id="name" type="text" maxlength="12" autocomplete="off" placeholder="SARA أو سارة" value="">
+    <input class="name" id="name" type="text" maxlength="12" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" lang="en" dir="ltr" placeholder="SARA" value="">
+    <div class="name-hint" id="nameHint">حروف إنجليزية بس (A–Z)</div>
   </div>
 
   <div class="sec">
@@ -415,7 +420,16 @@ CONFIG.shipping.forEach(o=>{
   b.onclick=()=>{ state.ship=o.id; render(); }; $("shipping").appendChild(b);
 });
 $("name").addEventListener("input",e=>{
-  const old=units().length; state.name=e.target.value;
+  const raw=e.target.value;
+  const clean=raw.toUpperCase().replace(/[^A-Z ]/g,"").replace(/ {2,}/g," ").replace(/^ /,"");
+  if(clean!==raw){
+    const pos=e.target.selectionStart-(raw.length-clean.length);
+    e.target.value=clean;
+    try{ e.target.setSelectionRange(Math.max(0,pos),Math.max(0,pos)); }catch(_){}
+  }
+  const hint=$("nameHint");
+  hint.classList.toggle("warn", raw.toUpperCase()!==clean && /[^A-Za-z ]/.test(raw));
+  const old=units().length; state.name=clean;
   const n=units().length; state.per.length=Math.min(state.per.length,n);
   if(state.sel>=n) state.sel=-1;
   render(n>old?n-1:null);
