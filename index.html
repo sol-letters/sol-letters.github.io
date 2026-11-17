@@ -144,35 +144,13 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs id="defs">
     <!-- matte, softly inflated plastic -->
-    <filter id="puff" x="-40%" y="-40%" width="180%" height="190%" color-interpolation-filters="sRGB">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="11" result="h"/>
-      <feDiffuseLighting in="h" surfaceScale="9" diffuseConstant="1" lighting-color="#fff" result="dif">
-        <feDistantLight azimuth="240" elevation="60"/>
-      </feDiffuseLighting>
-      <feComposite in="SourceGraphic" in2="dif" operator="arithmetic" k1=".62" k2=".42" result="shaded"/>
-      <feSpecularLighting in="h" surfaceScale="9" specularConstant=".16" specularExponent="12" lighting-color="#fff" result="spec">
-        <feDistantLight azimuth="240" elevation="64"/>
-      </feSpecularLighting>
-      <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
-      <feMorphology in="SourceAlpha" operator="erode" radius="8" result="inner"/>
-      <feColorMatrix in="SourceGraphic" type="luminanceToAlpha" result="lum"/>
-      <feGaussianBlur in="lum" stdDeviation="1.2" result="lumb"/>
-      <feSpecularLighting in="lumb" surfaceScale="4" specularConstant=".45" specularExponent="12" lighting-color="#fff" result="tspec">
-        <feDistantLight azimuth="240" elevation="45"/>
-      </feSpecularLighting>
-      <feComposite in="tspec" in2="inner" operator="in" result="tspecIn"/>
-      <feComposite in="shaded" in2="specIn" operator="arithmetic" k2="1" k3="1" result="l1"/>
-      <feComposite in="l1" in2="tspecIn" operator="arithmetic" k2="1" k3=".7" result="l2"/>
-      <feComposite in="l2" in2="SourceAlpha" operator="in" result="letter"/>
-      <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="sb"/>
-      <feOffset in="sb" dx="8" dy="14" result="so"/>
-      <feFlood flood-color="#2a1d17" flood-opacity=".22"/>
-      <feComposite in2="so" operator="in" result="shadow"/>
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="cb"/>
-      <feOffset in="cb" dx="2" dy="4" result="co"/>
-      <feFlood flood-color="#2a1d17" flood-opacity=".2"/>
-      <feComposite in2="co" operator="in" result="contact"/>
-      <feMerge><feMergeNode in="shadow"/><feMergeNode in="contact"/><feMergeNode in="letter"/></feMerge>
+    <!-- flat letters: no shine, just a very soft shadow on the wall -->
+    <filter id="flat" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="b"/>
+      <feOffset in="b" dx="4" dy="7" result="o"/>
+      <feFlood flood-color="#2a1d17" flood-opacity=".14"/>
+      <feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
 </svg>
@@ -366,7 +344,7 @@ function luma(h){ const [r,g,b]=rgb(h); return r*.299+g*.587+b*.114; }
 /* texture patterns (SVG units at FS=200) */
 function star(x,y,r){ let p=""; for(let i=0;i<10;i++){ const a=Math.PI/5*i-Math.PI/2,rr=i%2?r*.45:r; p+=`${(x+rr*Math.cos(a)).toFixed(1)},${(y+rr*Math.sin(a)).toFixed(1)} `;} return p; }
 function patternSVG(tex,hex){
-  const hi=mix(hex,.28), lo=mix(hex,-.1);
+  const hi=mix(hex,.22), lo=mix(hex,-.12);
   switch(tex){
     case "stars": return {w:70,h:70,body:`<rect width="70" height="70" fill="${hex}"/><g fill="${hi}"><polygon points="${star(18,18,9)}"/><polygon points="${star(52,50,6)}"/><path d="M52 6a10 10 0 1 0 10 14a8 8 0 1 1-10-14z"/><path d="M12 46a7 7 0 1 0 7 10a5.6 5.6 0 1 1-7-10z"/></g>`};
     case "knit": return {w:22,h:20,body:`<rect width="22" height="20" fill="${hex}"/><path d="M2 0 Q6 11 11 17 M20 0 Q16 11 11 17" stroke="${lo}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M2.5 -1 Q6 9.5 10.5 15 M19.5 -1 Q16 9.5 11.5 15" stroke="${hi}" stroke-width="3" fill="none" stroke-linecap="round"/>`};
@@ -491,7 +469,7 @@ function draw(animate){
     t.setAttribute("font-family",fam); t.setAttribute("font-weight",weight); t.setAttribute("font-size",FS); t.setAttribute("y",FS);
     const s=styleOf(i), fu=pat(s.tex,s.color);
     t.setAttribute("fill",fu); t.setAttribute("stroke",fu); t.setAttribute("stroke-width",stroke); t.setAttribute("stroke-linejoin","round");
-    t.setAttribute("filter","url(#puff)");
+    t.setAttribute("filter","url(#flat)");
     if(animate==="all"||animate===i) t.classList.add("pop");
     t.addEventListener("click",()=>{ state.sel = state.sel===i ? -1 : i; render(); });
     g.appendChild(t); svg.appendChild(g);
