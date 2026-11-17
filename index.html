@@ -579,7 +579,11 @@ $("closeBtn").onclick=()=>$("modal").classList.remove("show");
 $("modal").onclick=e=>{ if(e.target.id==="modal") $("modal").classList.remove("show"); };
 
 render("all");
-if(document.fonts) document.fonts.ready.then(()=>render());
+if(document.fonts){
+  document.fonts.ready.then(()=>render());
+  // make sure the bubble font is loaded even before anything uses it
+  document.fonts.load('400 100px "Modak"').then(()=>render()).catch(()=>{});
+}
 window.addEventListener("resize",()=>render());
 </script>
 </body>
