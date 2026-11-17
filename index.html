@@ -115,6 +115,16 @@
   .err{color:#c0392b;font-size:13px;font-weight:700;min-height:0}
   .banner{margin:4px 0 14px;border-radius:24px;overflow:hidden;aspect-ratio:16/9;background:#e9e6df}
   .banner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+  .shapes{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:10px}
+  .shp{background:var(--card);border-radius:18px;box-shadow:0 0 0 1.5px var(--line) inset;padding:10px 8px;text-align:center}
+  .shp.on{box-shadow:0 0 0 2px var(--ink) inset}
+  .shp svg{width:46px;height:46px;display:block;margin:2px auto 4px}
+  .shp b{display:block;font-size:14px}
+  .shp small{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
+  .step{display:flex;align-items:center;justify-content:center;gap:10px}
+  .step button{width:30px;height:30px;border-radius:50%;border:0;box-shadow:0 0 0 1.5px var(--line) inset;background:#fff;font-size:18px;font-weight:800;line-height:1}
+  .step .add1{background:var(--ink);color:#fff;box-shadow:none}
+  .step span{min-width:14px;font-weight:800}
   .fine{font-size:12px;color:var(--muted);line-height:1.7;margin:22px 0 0}
 
   /* sticky buy bar */
@@ -194,6 +204,11 @@
   <div class="sec">
     <div class="sec-h"><h2>ارتفاع الحرف</h2><small>السعر لكل حرف</small></div>
     <div class="pills" id="sizes"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>أشكال مع الاسم</h2><small>اختياري</small></div>
+    <div class="shapes" id="shapes"></div>
   </div>
 
   <div class="sec">
@@ -312,6 +327,16 @@ const CONFIG = {
     { name:"سماوي",      hex:"#3d94d8" },
     { name:"أزرق",       hex:"#1f46c8" },
   ],
+  // الأشكال (السعر للقطعة الواحدة، عدّليه)
+  shapes: [
+    { id:"heart",     name:"قلب",     price:15 },
+    { id:"flower",    name:"وردة",    price:15 },
+    { id:"crown",     name:"تاج",     price:15 },
+    { id:"butterfly", name:"فراشة",   price:15 },
+    { id:"bow",       name:"فيونكة",  price:15 },
+    { id:"castle",    name:"قصر",     price:15 },
+    { id:"dino",      name:"ديناصور", price:15 },
+  ],
   walls: ["#f1ece6","#e7dfd3","#f5e4e3","#e2ebef","#e5ebdf","#2b2829"],
   addons: [
     { id:"tape",  label:"لاصق جداري", note:"تعلّقينها بدون مسامير", price:6 },
@@ -328,11 +353,28 @@ const cur=CONFIG.currency, FS=200;
 
 const state={
   name:"", size:"8", wall:"#f1ece6", sel:-1, cart:0,
-  def:{ tex:"smooth", color:"#d8bf94" }, per:[], addons:new Set(), ship:"ship",
+  def:{ tex:"smooth", color:"#d8bf94" }, per:[], addons:new Set(), ship:"ship", shapes:[],
 };
 const units=()=>{ const t=state.name.trim(); return !t?[]:(AR.test(t)?t.split(/\s+/):[...t]); };
 const isRTL=()=>AR.test(state.name);
-const styleOf=i=>({ ...state.def, ...(state.per[i]||{}) });
+const SH=1000; // shape units start at this index
+const styleOf=i=>{ if(i>=SH){ const {id,...st}=state.shapes[i-SH]||{}; return {...state.def,...st}; } return { ...state.def, ...(state.per[i]||{}) }; };
+const shapeName=id=>CONFIG.shapes.find(x=>x.id===id)?.name||"";
+const unitLabel=i=> i>=SH ? shapeName(state.shapes[i-SH]?.id) : units()[i];
+
+/* shape drawings, in a 200x200 box */
+function shapeSVG(id){
+  switch(id){
+    case "heart": return `<path d="M100 182 C 34 136 6 98 18 60 C 30 22 80 16 100 54 C 120 16 170 22 182 60 C 194 98 166 136 100 182 Z"/>`;
+    case "flower": { let p=""; for(let k=0;k<8;k++){ p+=`<ellipse cx="100" cy="50" rx="21" ry="38" transform="rotate(${k*45} 100 100)"/>`; } return p+`<circle cx="100" cy="100" r="30"/>`; }
+    case "crown": return `<path d="M34 168 L24 74 L66 112 L100 52 L134 112 L176 74 L166 168 Z" stroke-linejoin="round" stroke-width="16"/><circle cx="24" cy="62" r="15"/><circle cx="100" cy="40" r="15"/><circle cx="176" cy="62" r="15"/>`;
+    case "butterfly": return `<ellipse cx="60" cy="70" rx="44" ry="36" transform="rotate(-18 60 70)"/><ellipse cx="140" cy="70" rx="44" ry="36" transform="rotate(18 140 70)"/><ellipse cx="68" cy="136" rx="32" ry="28" transform="rotate(20 68 136)"/><ellipse cx="132" cy="136" rx="32" ry="28" transform="rotate(-20 132 136)"/><rect x="90" y="40" width="20" height="124" rx="10"/>`;
+    case "bow": return `<path d="M100 100 C 72 58 18 44 14 82 C 10 120 22 158 54 150 C 78 144 92 122 100 100 Z"/><path d="M100 100 C 128 58 182 44 186 82 C 190 120 178 158 146 150 C 122 144 108 122 100 100 Z"/><rect x="80" y="76" width="40" height="48" rx="18"/>`;
+    case "castle": return `<rect x="20" y="92" width="46" height="90" rx="10"/><path d="M12 98 L43 38 L74 98 Z" stroke-linejoin="round" stroke-width="12"/><rect x="134" y="92" width="46" height="90" rx="10"/><path d="M126 98 L157 38 L188 98 Z" stroke-linejoin="round" stroke-width="12"/><rect x="58" y="112" width="84" height="70" rx="6"/><rect x="76" y="62" width="48" height="60" rx="6"/><path d="M68 66 L100 10 L132 66 Z" stroke-linejoin="round" stroke-width="12"/>`;
+    case "dino": return `<path d="M14 122 C 54 114 88 98 112 94 C 120 70 136 50 162 50 C 188 52 194 80 178 92 C 168 100 160 104 158 114 C 158 136 152 150 142 158 L148 182 C 149 192 132 194 130 184 L124 164 C 115 167 105 168 98 166 L100 186 C 101 194 84 196 82 186 L78 162 C 60 152 42 140 16 132 C 6 130 6 123 14 122 Z"/>`;
+  }
+  return "";
+}
 const colorName=h=>CONFIG.colors.find(c=>c.hex===h)?.name||"";
 const texName=id=>CONFIG.textures.find(t=>t.id===id)?.label||"";
 
@@ -391,6 +433,13 @@ CONFIG.addons.forEach(a=>{
   $("addons").appendChild(b);
 });
 
+CONFIG.shapes.forEach(sh=>{
+  const c=document.createElement("div"); c.className="shp"; c.dataset.id=sh.id;
+  c.innerHTML=`<svg viewBox="0 0 200 200"><g fill="#cfc6bb" stroke="#cfc6bb">${shapeSVG(sh.id)}</g></svg><b>${sh.name}</b><small>+${toAr(sh.price)} ${cur}</small><div class="step"><button class="rm" aria-label="إزالة">−</button><span>٠</span><button class="add1" aria-label="إضافة">+</button></div>`;
+  c.querySelector(".add1").onclick=()=>{ state.shapes.push({id:sh.id}); render(SH+state.shapes.length-1); };
+  c.querySelector(".rm").onclick=()=>{ for(let k=state.shapes.length-1;k>=0;k--){ if(state.shapes[k].id===sh.id){ state.shapes.splice(k,1); if(state.sel>=SH) state.sel=-1; break; } } render(); };
+  $("shapes").appendChild(c);
+});
 CONFIG.shipping.forEach(o=>{
   const b=document.createElement("button"); b.className="addon ship"; b.dataset.id=o.id;
   b.innerHTML=`<span class="box radio"></span><span class="t">${o.label}<small>${o.note}</small></span><span class="p" data-p></span>`;
@@ -408,16 +457,18 @@ $("name").addEventListener("input",e=>{
   hint.classList.toggle("warn", raw.toUpperCase()!==clean && /[^A-Za-z ]/.test(raw));
   const old=units().length; state.name=clean;
   const n=units().length; state.per.length=Math.min(state.per.length,n);
-  if(state.sel>=n) state.sel=-1;
+  if(state.sel>=n && state.sel<SH) state.sel=-1;
   render(n>old?n-1:null);
 });
 $("doneEdit").onclick=()=>{ state.sel=-1; render(); };
 
 function apply(patch){
-  if(state.sel>=0){ state.per[state.sel]={...(state.per[state.sel]||{}),...patch}; render(state.sel); }
+  if(state.sel>=SH){ const k=state.sel-SH; state.shapes[k]={...state.shapes[k],...patch}; render(state.sel); }
+  else if(state.sel>=0){ state.per[state.sel]={...(state.per[state.sel]||{}),...patch}; render(state.sel); }
   else{
     state.def={...state.def,...patch};
     state.per=state.per.map(p=>{ if(!p) return p; const q={...p}; Object.keys(patch).forEach(k=>delete q[k]); return q; });
+    state.shapes=state.shapes.map(p=>{ const q={...p}; Object.keys(patch).forEach(k=>delete q[k]); return q; });
     render("all");
   }
 }
@@ -437,6 +488,7 @@ $("surprise").onclick=()=>{
   const tex=CONFIG.textures[Math.floor(Math.random()*CONFIG.textures.length)].id;
   state.def={tex,color:p[off]}; state.sel=-1;
   state.per=units().map((_,i)=>({color:p[(i+off)%p.length]}));
+  state.shapes=state.shapes.map((sh,k)=>({id:sh.id,color:p[(units().length+k+off)%p.length]}));
   render("all");
 };
 
@@ -445,19 +497,21 @@ function price(){
   const n=[...state.name.replace(/\s/g,"")].length;
   const add=CONFIG.addons.filter(a=>state.addons.has(a.id));
   const letters=n*sz.pricePerLetter;
-  const sub=letters+add.reduce((s,a)=>s+a.price,0);
+  const shp=state.shapes.reduce((t,x)=>t+(CONFIG.shapes.find(c=>c.id===x.id)?.price||0),0);
+  const sub=letters+shp+add.reduce((s,a)=>s+a.price,0);
   const so=CONFIG.shipping.find(o=>o.id===state.ship);
-  const free=CONFIG.freeShippingOver>0 && letters>=CONFIG.freeShippingOver;
-  const ship=(free||!n)?0:so.price;
-  return { sz, n, add, letters, so, ship, free, total:sub+ship };
+  const free=CONFIG.freeShippingOver>0 && (letters+shp)>=CONFIG.freeShippingOver;
+  const ship=(free||(!n&&!state.shapes.length))?0:so.price;
+  return { sz, n, add, letters, shp, so, ship, free, total:sub+ship };
 }
 
 /* the scene */
 function draw(animate){
   const svg=$("scene"), U=units(), rtl=isRTL();
   svg.innerHTML="";
-  $("empty").style.display=U.length?"none":"";
-  if(!U.length) return;
+  const S=state.shapes;
+  $("empty").style.display=(U.length||S.length)?"none":"";
+  if(!U.length && !S.length) return;
   const fam=rtl?"'Baloo Bhaijaan 2',sans-serif":"'Modak','Baloo Bhaijaan 2',sans-serif";
   const weight=rtl?"800":"400";
   const stroke=rtl?FS*.12:FS*.03;
@@ -488,18 +542,39 @@ function draw(animate){
     if(state.sel>=0 && !sel) it.g.setAttribute("opacity",".55");
     x+=it.w+gap;
   });
+  if(!U.length){ minY=FS*.1; maxY=FS; }
+  // shapes after the name
+  const sh=(maxY-minY)*.9, sc=sh/200, sy=(minY+maxY)/2-sh/2;
+  if(U.length && S.length) x+=FS*.12-gap;
+  S.forEach((o,k)=>{
+    const i=SH+k, st=styleOf(i), fu=pat(st.tex,st.color), sel=state.sel===i;
+    const g=document.createElementNS(NS,"g");
+    const lift=sel?-FS*.08:0;
+    g.setAttribute("transform",`translate(${x} ${sy+lift}) scale(${sc})`);
+    const inner=document.createElementNS(NS,"g");
+    inner.setAttribute("fill",fu); inner.setAttribute("stroke",fu);
+    inner.innerHTML=shapeSVG(o.id);
+    if(animate===i) inner.classList.add("pop");
+    inner.style.cursor="pointer";
+    inner.addEventListener("click",()=>{ state.sel = state.sel===i ? -1 : i; render(); });
+    g.appendChild(inner);
+    if(state.sel>=0 && !sel) g.setAttribute("opacity",".55");
+    svg.appendChild(g);
+    x+=sh+FS*.08;
+  });
+  if(S.length) x-=FS*.08-gap;
   const total=x-gap, px=FS*.22, pt=FS*.16, pb=FS*.3;
   svg.setAttribute("viewBox",`${-px} ${minY-pt} ${total+px*2} ${maxY-minY+pt+pb}`);
 }
 
 function render(animate){
-  const U=units(), rtl=isRTL(), {sz,n,add,so,ship,free,total}=price();
+  const U=units(), rtl=isRTL(), {sz,n,add,shp,so,ship,free,total}=price();
   $("stage").style.backgroundColor=state.wall;
   draw(animate);
 
   const one=state.sel>=0;
   $("editing").classList.toggle("show",one);
-  if(one) $("editCh").textContent=U[state.sel];
+  if(one) $("editCh").textContent=unitLabel(state.sel);
   $("hint").textContent = U.length ? (rtl?"اضغطي على أي كلمة عشان تلوّنينها لحالها":"اضغطي على أي حرف عشان تلوّنينه لحاله") : "";
   $("tagSize").textContent=`${toAr(sz.cm)} سم`;
   $("tagCount").textContent=`${toAr(n)} ${n===1?"حرف":"حروف"}`;
@@ -512,14 +587,16 @@ function render(animate){
   document.querySelectorAll(".sw").forEach(b=>b.classList.toggle("on",b.dataset.hex===cs.color));
   document.querySelectorAll(".wall:not(.any)").forEach(b=>b.classList.toggle("on",b.dataset.hex===state.wall));
   document.querySelectorAll(".addon").forEach(b=>b.classList.toggle("on",state.addons.has(b.dataset.id)));
-  $("texScope").textContent = one ? `للحرف ${U[state.sel]}` : "لكل الحروف";
+  $("texScope").textContent = one ? (state.sel>=SH?`للـ${unitLabel(state.sel)}`:`للحرف ${unitLabel(state.sel)}`) : "للكل";
+  document.querySelectorAll(".shp").forEach(c=>{ const cnt=state.shapes.filter(x=>x.id===c.dataset.id).length; c.querySelector(".step span").textContent=toAr(cnt); c.classList.toggle("on",cnt>0); });
   $("colName").textContent = colorName(cs.color);
 
   $("total").textContent=`${toAr(total)} ${cur}`;
-  $("totalSub").textContent = n ? `${toAr(n)} ${n===1?"حرف":"حروف"} × ${toAr(sz.pricePerLetter)} ${cur}${add.length?" + إضافات":""}${ship?" + توصيل":""}` : "الإجمالي";
+  $("totalSub").textContent = n ? `${toAr(n)} ${n===1?"حرف":"حروف"} × ${toAr(sz.pricePerLetter)} ${cur}${state.shapes.length?" + أشكال":""}${add.length?" + إضافات":""}${ship?" + توصيل":""}` : "الإجمالي";
   const shipTxt = free ? `<b class="free">مجاني</b>` : (ship ? `<b>${toAr(ship)} ${cur}</b>` : `<b>بدون</b>`);
   $("bill").innerHTML = `
     <div class="r"><span>${toAr(n)} ${n===1?"حرف":"حروف"} × ${toAr(sz.pricePerLetter)} ${cur} (مقاس ${toAr(sz.cm)} سم)</span><b>${toAr(n*sz.pricePerLetter)} ${cur}</b></div>
+    ${state.shapes.length?`<div class="r"><span>أشكال (${toAr(state.shapes.length)})</span><b>${toAr(shp)} ${cur}</b></div>`:""}
     ${add.map(a=>`<div class="r"><span>${a.label}</span><b>${toAr(a.price)} ${cur}</b></div>`).join("")}
     <div class="r"><span>التوصيل (${so.label})</span>${shipTxt}</div>
     <div class="r t"><span>الإجمالي</span><b>${toAr(total)} ${cur}</b></div>`;
@@ -531,11 +608,11 @@ function render(animate){
   });
   const left = CONFIG.freeShippingOver - n*sz.pricePerLetter;
   $("freeHint").innerHTML = CONFIG.freeShippingOver>0 ? (free ? `<span class="free">🎉 شحنك مجاني</span>` : `شحن مجاني فوق ${toAr(CONFIG.freeShippingOver)} ${cur}`) : "";
-  $("addBtn").disabled=n===0;
+  $("addBtn").disabled=(n===0 && !state.shapes.length);
 }
 
 function orderText(){
-  const U=units(), {sz,n,add,so,ship,free,total}=price();
+  const U=units(), {sz,n,add,shp,so,ship,free,total}=price();
   const v=id=>$(id).value.trim();
   const C=[`👤 بيانات العميل:`,`الاسم: ${v("cName")}`,`الجوال: ${v("cPhone")}`];
   if(state.ship!=="pickup"){
@@ -546,7 +623,9 @@ function orderText(){
   if(v("cNote")) C.push(`ملاحظات: ${v("cNote")}`);
   const L=[`السلام عليكم، أبي أطلب حروف اسم ✨`,``,`🔤 الاسم على الحروف: ${state.name.trim()}`,`الارتفاع: ${toAr(sz.cm)} سم`,`عدد الحروف: ${toAr(n)}`,``,`${isRTL()?"الكلمات":"الحروف"}:`];
   U.forEach((u,i)=>{ if(u===" ") return; const st=styleOf(i); L.push(`• ${u}: ${colorName(st.color)} - ${texName(st.tex)}`); });
+  if(state.shapes.length){ L.push(``,`الأشكال:`); state.shapes.forEach((o,k)=>{ const st=styleOf(SH+k); L.push(`• ${shapeName(o.id)}: ${colorName(st.color)} - ${texName(st.tex)}`); }); }
   L.push(``,`السعر:`,`• ${toAr(n)} حروف × ${toAr(sz.pricePerLetter)} ${cur} = ${toAr(n*sz.pricePerLetter)} ${cur}`);
+  if(state.shapes.length) L.push(`• أشكال (${toAr(state.shapes.length)}): ${toAr(shp)} ${cur}`);
   add.forEach(a=>L.push(`• ${a.label}: ${toAr(a.price)} ${cur}`));
   L.push(`• التوصيل (${so.label}): ${free?"مجاني":(ship?toAr(ship)+" "+cur:"بدون")}`);
   L.push(`الإجمالي: ${toAr(total)} ${cur}`);
