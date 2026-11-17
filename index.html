@@ -461,15 +461,14 @@ function draw(animate){
   const fam=rtl?"'Baloo Bhaijaan 2',sans-serif":"'Modak','Baloo Bhaijaan 2',sans-serif";
   const weight=rtl?"800":"400";
   const stroke=rtl?FS*.12:FS*.03;
-  const gap=rtl?FS*.14:-FS*.035;
+  const gap=rtl?FS*.14:FS*.02;
   const items=U.map((u,i)=>{
     if(u===" ") return {space:true,w:FS*.3};
     const g=document.createElementNS(NS,"g"), t=document.createElementNS(NS,"text");
     t.textContent=u;
     t.setAttribute("font-family",fam); t.setAttribute("font-weight",weight); t.setAttribute("font-size",FS); t.setAttribute("y",FS);
     const s=styleOf(i), fu=pat(s.tex,s.color);
-    t.setAttribute("fill",fu); t.setAttribute("stroke",fu); t.setAttribute("stroke-width",stroke); t.setAttribute("stroke-linejoin","round");
-    t.setAttribute("filter","url(#flat)");
+    t.setAttribute("fill",fu);
     if(animate==="all"||animate===i) t.classList.add("pop");
     t.addEventListener("click",()=>{ state.sel = state.sel===i ? -1 : i; render(); });
     g.appendChild(t); svg.appendChild(g);
@@ -483,8 +482,8 @@ function draw(animate){
     const bb=it.t.getBBox();
     minY=Math.min(minY,bb.y); maxY=Math.max(maxY,bb.y+bb.height);
     const cx=bb.x+bb.width/2, cy=bb.y+bb.height/2, sel=state.sel===it.i;
-    const rot=(((it.i*37+11)%7)-3)*1.1 + (sel?-5:0);
-    const lift=sel?-FS*.08:(((it.i*53)%5)-2)*FS*.01;
+    const rot=0;
+    const lift=sel?-FS*.08:0;
     it.g.setAttribute("transform",`translate(0 ${lift}) rotate(${rot} ${cx} ${cy})`);
     if(state.sel>=0 && !sel) it.g.setAttribute("opacity",".55");
     x+=it.w+gap;
