@@ -701,6 +701,20 @@ const colorName=h=>CONFIG.colors.find(c=>c.hex===h)?.name||"";
 const texName=id=>CONFIG.textures.find(t=>t.id===id)?.label||"";
 
 function rgb(h){ const n=parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+/* recolour a shape image to any colour, keeping its 3D shading */
+const SHAPE_L={boat:.773,bow:.722,butterfly:.685,car:.422,castle:.791,cloud:.724,crown:.755,dino:.679,dolphin:.642,elephant:.645,flower:.818,giraffe:.75,heart:.689,leaf:.69,lion:.716,octopus:.679,palm:.641,rocket:.494,snake:.687};
+const tints={};
+function tint(id,hex){
+  const fid=`t-${id}-${hex.slice(1)}`;
+  if(!tints[fid]){
+    const k=1/(SHAPE_L[id]||.7), [r,g,b]=rgb(hex).map(v=>v/255), row=c=>`${(c*.299*k).toFixed(4)} ${(c*.587*k).toFixed(4)} ${(c*.114*k).toFixed(4)} 0 0`;
+    const f=document.createElementNS(NS,"filter");
+    f.setAttribute("id",fid); f.setAttribute("x","-20%"); f.setAttribute("y","-20%"); f.setAttribute("width","140%"); f.setAttribute("height","150%"); f.setAttribute("color-interpolation-filters","sRGB");
+    f.innerHTML=`<feColorMatrix in="SourceGraphic" type="matrix" values="${row(r)} ${row(g)} ${row(b)} 0 0 0 1 0" result="c"/><feGaussianBlur in="SourceAlpha" stdDeviation="5" result="b"/><feOffset in="b" dx="4" dy="7" result="o"/><feFlood flood-color="#2a1d17" flood-opacity=".14"/><feComposite in2="o" operator="in" result="sh"/><feMerge><feMergeNode in="sh"/><feMergeNode in="c"/></feMerge>`;
+    $("defs").appendChild(f); tints[fid]=1;
+  }
+  return `url(#${fid})`;
+}
 function mix(h,t){ const [r,g,b]=rgb(h),f=c=>t<0?Math.round(c*(1+t)):Math.round(c+(255-c)*t); return `rgb(${f(r)},${f(g)},${f(b)})`; }
 function luma(h){ const [r,g,b]=rgb(h); return r*.299+g*.587+b*.114; }
 
@@ -795,7 +809,6 @@ function apply(patch){
   else{
     state.def={...state.def,...patch};
     state.per=state.per.map(p=>{ if(!p) return p; const q={...p}; Object.keys(patch).forEach(k=>delete q[k]); return q; });
-    state.shapes=state.shapes.map(p=>{ const q={...p}; Object.keys(patch).forEach(k=>delete q[k]); return q; });
     render("all");
   }
 }
@@ -880,8 +893,13 @@ function draw(animate){
     const im=document.createElementNS(NS,"image");
     im.setAttribute("href",`assets/shapes/${o.id}.png`);
     im.setAttribute("x",x); im.setAttribute("y",maxY-hh); im.setAttribute("width",ww); im.setAttribute("height",hh);
-    im.setAttribute("filter","url(#flat)");
+    const own=state.shapes[k]&&state.shapes[k].color, sel=state.sel===i;
+    im.setAttribute("filter", own ? tint(o.id,own) : "url(#flat)");
+    if(sel) im.setAttribute("y",maxY-hh-FS*.08);
+    if(state.sel>=0 && !sel) im.setAttribute("opacity",".55");
     if(animate===i) im.classList.add("pop");
+    im.style.cursor="pointer";
+    im.addEventListener("click",()=>{ state.sel = state.sel===i ? -1 : i; render(); });
     svg.appendChild(im);
     x+=ww+FS*.06;
   });
@@ -898,7 +916,7 @@ function render(animate){
   const one=state.sel>=0;
   $("editing").classList.toggle("show",one);
   if(one) $("editCh").textContent=unitLabel(state.sel);
-  $("hint").textContent = U.length ? (rtl?"اضغطي على أي كلمة عشان تلوّنينها لحالها":"اضغطي على أي حرف عشان تلوّنينه لحاله") : "";
+  $("hint").textContent = U.length ? (rtl?"اضغطي على أي كلمة عشان تلوّنينها لحالها":"اضغطي على أي حرف أو شكل عشان تلوّنينه لحاله") : "";
   $("tagSize").textContent=`${toAr(sz.cm)} سم`;
   $("tagCount").textContent=`${toAr(n)} ${n===1?"حرف":"حروف"}`;
   $("count").textContent=`${toAr([...state.name].length)} / ${toAr(CONFIG.maxLetters)}`;
@@ -907,12 +925,13 @@ function render(animate){
   const cs=one?styleOf(state.sel):state.def;
   document.querySelectorAll("#sizes .pill").forEach(b=>b.classList.toggle("on",b.dataset.id===state.size));
   document.querySelectorAll("#textures .pill").forEach(b=>b.classList.toggle("on",b.dataset.id===cs.tex));
-  document.querySelectorAll(".sw").forEach(b=>b.classList.toggle("on",b.dataset.hex===cs.color));
+  const origShape = one && state.sel>=SH && !(state.shapes[state.sel-SH]||{}).color;
+  document.querySelectorAll(".sw").forEach(b=>b.classList.toggle("on",!origShape && b.dataset.hex===cs.color));
   document.querySelectorAll(".wall:not(.any)").forEach(b=>b.classList.toggle("on",b.dataset.hex===state.wall));
   document.querySelectorAll(".addon").forEach(b=>b.classList.toggle("on",state.addons.has(b.dataset.id)));
   $("texScope").textContent = one ? (state.sel>=SH?`للـ${unitLabel(state.sel)}`:`للحرف ${unitLabel(state.sel)}`) : "للكل";
   document.querySelectorAll(".shp").forEach(c=>{ const cnt=state.shapes.filter(x=>x.id===c.dataset.id).length; c.querySelector(".cnt").textContent=toAr(cnt); c.classList.toggle("on",cnt>0); });
-  $("colName").textContent = colorName(cs.color);
+  $("colName").textContent = origShape ? "لونه الأصلي" : colorName(cs.color);
 
   $("total").textContent=`${toAr(total)} ${cur}`;
   $("totalSub").textContent = n ? `${toAr(n)} ${n===1?"حرف":"حروف"} × ${toAr(sz.pricePerLetter)} ${cur}${state.shapes.length?" + أشكال":""}${add.length?" + إضافات":""}${ship?" + توصيل":""}` : "الإجمالي";
@@ -946,7 +965,7 @@ function orderText(){
   if(v("cNote")) C.push(`ملاحظات: ${v("cNote")}`);
   const L=[`السلام عليكم، أبي أطلب حروف اسم ✨`,``,`🔤 الاسم على الحروف: ${state.name.trim()}`,`الارتفاع: ${toAr(sz.cm)} سم`,`عدد الحروف: ${toAr(n)}`,``,`${isRTL()?"الكلمات":"الحروف"}:`];
   U.forEach((u,i)=>{ if(u===" ") return; const st=styleOf(i); L.push(`• ${u}: ${colorName(st.color)} - ${texName(st.tex)}`); });
-  if(state.shapes.length){ L.push(``,`الأشكال:`); state.shapes.forEach(o=>L.push(`• ${shapeName(o.id)}`)); }
+  if(state.shapes.length){ L.push(``,`الأشكال:`); state.shapes.forEach(o=>L.push(`• ${shapeName(o.id)}: ${o.color?colorName(o.color):"لونه الأصلي"}`)); }
   L.push(``,`السعر:`,`• ${toAr(n)} حروف × ${toAr(sz.pricePerLetter)} ${cur} = ${toAr(n*sz.pricePerLetter)} ${cur}`);
   if(state.shapes.length) L.push(`• أشكال (${toAr(state.shapes.length)}): ${toAr(shp)} ${cur}`);
   add.forEach(a=>L.push(`• ${a.label}: ${toAr(a.price)} ${cur}`));
