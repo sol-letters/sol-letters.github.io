@@ -596,6 +596,10 @@
 </div>
 
 <script>
+/* always open at the top of the page, even from a link with #design or after a reload */
+if("scrollRestoration" in history) history.scrollRestoration="manual";
+if(location.hash){ history.replaceState(null,"",location.pathname+location.search); }
+window.addEventListener("load",()=>{ document.documentElement.style.scrollBehavior="auto"; window.scrollTo(0,0); document.documentElement.style.scrollBehavior=""; });
 /* =========================================================
    الإعدادات: الأسعار والألوان والملمس (عدّليها من هنا)
    ========================================================= */
