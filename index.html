@@ -29,6 +29,8 @@
 
   /* sticky preview */
   .preview{position:sticky;top:8px;z-index:5;margin-top:4px}
+  .lp .preview{top:72px}
+  .lp #design{padding-top:16px}
   .stage{position:relative;border-radius:28px;overflow:hidden;height:236px;display:flex;align-items:center;justify-content:center;transition:background-color .35s;box-shadow:0 10px 30px -18px rgba(40,25,20,.45),0 0 0 1px rgba(0,0,0,.04)}
   .stage::before{content:"";position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(80% 70% at 20% 0%,rgba(255,255,255,.5),transparent 60%),radial-gradient(100% 80% at 90% 120%,rgba(0,0,0,.10),transparent 60%)}
@@ -265,6 +267,7 @@
 
   @media (max-width:820px){
     .lp-nav{position:static}
+    .lp .preview{top:8px}
     .lp-links{display:none}
     .lp-hero .lp-wrap,.lp-about .lp-wrap,.lp-design .lp-box{grid-template-columns:1fr}
     .lp-hero .lp-wrap{padding-top:28px;gap:26px}
@@ -332,6 +335,93 @@
     <a class="lp-btn lp-dark lp-sm" href="#design">صممي اسمك</a>
   </div>
 </header>
+<div class="wrap" id="design" style="scroll-margin-top:72px">
+  <div class="preview">
+    <div class="stage" id="stage">
+      <div class="editing" id="editing">
+        <span>تعدّلين الحرف <span class="ch" id="editCh"></span> لحاله</span>
+        <button id="doneEdit">كل الحروف</button>
+      </div>
+      <svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="empty" id="empty">اكتبي الاسم ويطلع هنا ✨</div>
+      <div class="tag"><span id="tagSize"></span><span id="tagCount"></span></div>
+    </div>
+    <p class="hint" id="hint"></p>
+  </div>
+
+  <h1>صمّمي اسمك</h1>
+  <p class="from" id="from"></p>
+
+  <div class="sec">
+    <div class="sec-h"><h2>الاسم</h2><small id="count"></small></div>
+    <input class="name" id="name" type="text" maxlength="12" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" lang="en" dir="ltr" placeholder="SARA" value="">
+    <div class="name-hint" id="nameHint">حروف إنجليزية بس (A–Z)</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>ارتفاع الحرف</h2><small>السعر لكل حرف</small></div>
+    <div class="pills" id="sizes"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>أشكال مع الاسم</h2><small id="shpNote">اختياري</small></div>
+    <div class="shapes" id="shapes"></div>
+    <div class="shp-hint">اضغطي على الشكل لإضافته، واضغطي مرة ثانية تزيدين العدد</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>الملمس</h2><small id="texScope"></small></div>
+    <div class="pills" id="textures"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>اللون</h2><small id="colName"></small></div>
+    <div class="swatches" id="colors"></div>
+  </div>
+
+  <button class="surprise" id="surprise">🎲 فاجئيني بتنسيق ألوان</button>
+
+  <div class="sec">
+    <div class="sec-h"><h2>لون الجدار في المعاينة</h2></div>
+    <div class="walls" id="walls"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>إضافات</h2></div>
+    <div id="addons"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>التوصيل</h2><small id="freeHint"></small></div>
+    <div id="shipping"></div>
+  </div>
+
+  <div class="sec" id="custSec">
+    <div class="sec-h"><h2>بياناتك</h2><small>عشان نوصّل لك طلبك</small></div>
+    <div class="form">
+      <label class="fld"><span>الاسم <i>*</i></span><input id="cName" type="text" autocomplete="name" placeholder="اسمك الكامل"></label>
+      <label class="fld"><span>رقم الجوال <i>*</i></span><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="05XXXXXXXX"></label>
+      <div id="addrBox">
+        <div class="two">
+          <label class="fld"><span>المدينة <i>*</i></span><input id="cCity" type="text" autocomplete="address-level2" placeholder="مثال: الرياض"></label>
+          <label class="fld"><span>الحي <i>*</i></span><input id="cDist" type="text" placeholder="مثال: النرجس"></label>
+        </div>
+        <label class="fld"><span>الشارع ورقم البيت</span><input id="cStreet" type="text" autocomplete="street-address" placeholder="اختياري"></label>
+        <label class="fld"><span>العنوان الوطني المختصر</span><input id="cShort" type="text" dir="ltr" placeholder="مثال: RRRD2929 (اختياري)"></label>
+      </div>
+      <label class="fld"><span>ملاحظات</span><input id="cNote" type="text" placeholder="أي شي تبين نعرفه (اختياري)"></label>
+      <div class="err" id="err"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>تفاصيل السعر</h2></div>
+    <div class="bill" id="bill"></div>
+  </div>
+
+  <p class="fine">المعاينة توضيحية، والألوان في القطعة الحقيقية ممكن تختلف شوي حسب الإضاءة والشاشة. كل قطعة تنطبع لك خصيصًا والتجهيز من ٥ إلى ٧ أيام.</p>
+</div>
+
 <!-- ١. الواجهة -->
   <div class="lp-hero">
     <div class="lp-wrap">
@@ -424,93 +514,6 @@
   </section>
 
   </div>
-
-<div class="wrap" id="design" style="scroll-margin-top:72px">
-  <div class="preview">
-    <div class="stage" id="stage">
-      <div class="editing" id="editing">
-        <span>تعدّلين الحرف <span class="ch" id="editCh"></span> لحاله</span>
-        <button id="doneEdit">كل الحروف</button>
-      </div>
-      <svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="empty" id="empty">اكتبي الاسم ويطلع هنا ✨</div>
-      <div class="tag"><span id="tagSize"></span><span id="tagCount"></span></div>
-    </div>
-    <p class="hint" id="hint"></p>
-  </div>
-
-  <h1>صمّمي اسمك</h1>
-  <p class="from" id="from"></p>
-
-  <div class="sec">
-    <div class="sec-h"><h2>الاسم</h2><small id="count"></small></div>
-    <input class="name" id="name" type="text" maxlength="12" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" lang="en" dir="ltr" placeholder="SARA" value="">
-    <div class="name-hint" id="nameHint">حروف إنجليزية بس (A–Z)</div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-h"><h2>ارتفاع الحرف</h2><small>السعر لكل حرف</small></div>
-    <div class="pills" id="sizes"></div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-h"><h2>أشكال مع الاسم</h2><small id="shpNote">اختياري</small></div>
-    <div class="shapes" id="shapes"></div>
-    <div class="shp-hint">اضغطي على الشكل لإضافته، واضغطي مرة ثانية تزيدين العدد</div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-h"><h2>الملمس</h2><small id="texScope"></small></div>
-    <div class="pills" id="textures"></div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-h"><h2>اللون</h2><small id="colName"></small></div>
-    <div class="swatches" id="colors"></div>
-  </div>
-
-  <button class="surprise" id="surprise">🎲 فاجئيني بتنسيق ألوان</button>
-
-  <div class="sec">
-    <div class="sec-h"><h2>لون الجدار في المعاينة</h2></div>
-    <div class="walls" id="walls"></div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-h"><h2>إضافات</h2></div>
-    <div id="addons"></div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-h"><h2>التوصيل</h2><small id="freeHint"></small></div>
-    <div id="shipping"></div>
-  </div>
-
-  <div class="sec" id="custSec">
-    <div class="sec-h"><h2>بياناتك</h2><small>عشان نوصّل لك طلبك</small></div>
-    <div class="form">
-      <label class="fld"><span>الاسم <i>*</i></span><input id="cName" type="text" autocomplete="name" placeholder="اسمك الكامل"></label>
-      <label class="fld"><span>رقم الجوال <i>*</i></span><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="05XXXXXXXX"></label>
-      <div id="addrBox">
-        <div class="two">
-          <label class="fld"><span>المدينة <i>*</i></span><input id="cCity" type="text" autocomplete="address-level2" placeholder="مثال: الرياض"></label>
-          <label class="fld"><span>الحي <i>*</i></span><input id="cDist" type="text" placeholder="مثال: النرجس"></label>
-        </div>
-        <label class="fld"><span>الشارع ورقم البيت</span><input id="cStreet" type="text" autocomplete="street-address" placeholder="اختياري"></label>
-        <label class="fld"><span>العنوان الوطني المختصر</span><input id="cShort" type="text" dir="ltr" placeholder="مثال: RRRD2929 (اختياري)"></label>
-      </div>
-      <label class="fld"><span>ملاحظات</span><input id="cNote" type="text" placeholder="أي شي تبين نعرفه (اختياري)"></label>
-      <div class="err" id="err"></div>
-    </div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-h"><h2>تفاصيل السعر</h2></div>
-    <div class="bill" id="bill"></div>
-  </div>
-
-  <p class="fine">المعاينة توضيحية، والألوان في القطعة الحقيقية ممكن تختلف شوي حسب الإضاءة والشاشة. كل قطعة تنطبع لك خصيصًا والتجهيز من ٥ إلى ٧ أيام.</p>
-</div>
 
 <div class="lp">
 <!-- ٦. خطوات الطلب -->
