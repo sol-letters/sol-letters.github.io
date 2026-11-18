@@ -850,13 +850,14 @@ function draw(animate){
   });
   if(!U.length){ minY=FS*.1; maxY=FS; }
   // shapes after the name
-  const sh=(maxY-minY)*.9, sc=sh/200, sy=(minY+maxY)/2-sh/2;
+  const sh=(maxY-minY)*.6, sc=sh/200, sy=maxY-sh;
   if(U.length && S.length) x+=FS*.12-gap;
   S.forEach((o,k)=>{
     const i=SH+k, st=styleOf(i), fu=pat(st.tex,st.color), sel=state.sel===i;
     const g=document.createElementNS(NS,"g");
     const lift=sel?-FS*.08:0;
     g.setAttribute("transform",`translate(${x} ${sy+lift}) scale(${sc})`);
+    g.setAttribute("filter","url(#puff)");
     const inner=document.createElementNS(NS,"g");
     inner.setAttribute("fill",fu); inner.setAttribute("stroke",fu);
     inner.innerHTML=shapeSVG(o.id);
