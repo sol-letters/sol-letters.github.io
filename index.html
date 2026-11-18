@@ -187,8 +187,15 @@
   .lp-cta{display:flex;gap:10px;flex-wrap:wrap}
   .lp-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
   .lp-chip{font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;box-shadow:0 0 0 1px var(--line) inset;background:var(--card)}
-  .lp-hero-img{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3.4;border-radius:28px;overflow:hidden;padding:8%;box-sizing:border-box;background:repeating-linear-gradient(90deg,var(--sky) 0 44px,#5a3a22 44px 88px)}
-  .lp-hero-img img{width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 28px 26px rgba(62,29,26,.18))}
+  .lp-hero-img{position:relative;aspect-ratio:1/1;width:100%;max-width:560px;margin-inline:auto;direction:ltr}
+  .lp-blob{position:absolute;right:-4%;bottom:2%;width:62%;aspect-ratio:1;background:var(--sky);opacity:.55;border-radius:58% 42% 63% 37% / 45% 58% 42% 55%;animation:lp-morph 14s ease-in-out infinite}
+  .lp-fl{position:absolute;height:auto;filter:drop-shadow(0 26px 22px rgba(62,29,26,.20));transform:rotate(var(--r));animation:lp-float var(--t,6s) ease-in-out infinite;animation-delay:var(--d,0s)}
+  .lp-fl.s{left:2%;top:26%;width:46%;--r:-9deg;--t:6.5s;z-index:2}
+  .lp-fl.o{left:40%;top:4%;width:40%;--r:7deg;--t:7.5s;--d:-2s;z-index:1}
+  .lp-fl.l{left:56%;top:50%;width:33%;--r:-5deg;--t:5.5s;--d:-1s;z-index:3}
+  @keyframes lp-float{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-14px) rotate(calc(var(--r) + 2deg))}}
+  @keyframes lp-morph{0%,100%{border-radius:58% 42% 63% 37% / 45% 58% 42% 55%}50%{border-radius:40% 60% 45% 55% / 60% 40% 60% 40%}}
+  @media (prefers-reduced-motion:reduce){.lp-fl,.lp-blob{animation:none}}
 
   /* مكان صورة مؤقت */
   .lp-ph{width:100%;height:100%;min-height:180px;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:13px;font-weight:700;
@@ -271,6 +278,7 @@
     .lp-links{display:none}
     .lp-hero .lp-wrap,.lp-about .lp-wrap,.lp-design .lp-box{grid-template-columns:1fr}
     .lp-hero .lp-wrap{padding-top:28px;gap:26px}
+    .lp-hero-img{order:-1;max-width:380px}
     .lp-grid{grid-template-columns:1fr}
     .lp-prod.lp-wide{flex-direction:column}
     .lp-prod.lp-wide .lp-img{min-height:200px}
@@ -335,6 +343,32 @@
     <a class="lp-btn lp-dark lp-sm" href="#design">صممي اسمك</a>
   </div>
 </header>
+<!-- ١. الواجهة -->
+  <div class="lp-hero">
+    <div class="lp-wrap">
+      <div>
+        <p class="lp-eyebrow">صُنع يدويًا في السعودية</p>
+        <h1>كل حرف<br>فيه فرحة.</h1>
+        <p>حروف منفوخة مطبوعة 3D بالاسم اللي تبينه، خفيفة وآمنة لغرف الأطفال، وبالألوان اللي تختارينها.</p>
+        <div class="lp-cta">
+          <a class="lp-btn lp-dark" href="#design">صممي اسمك</a>
+          <a class="lp-btn lp-line" href="#products">شوفي المنتجات</a>
+        </div>
+        <div class="lp-chips">
+          <span class="lp-chip" id="chipSizes"></span>
+          <span class="lp-chip">ناعم أو مخيوط</span>
+          <span class="lp-chip" id="colorCount"></span>
+        </div>
+      </div>
+      <div class="lp-hero-img" role="img" aria-label="حروف S O L منفوخة باللون الأصفر">
+        <span class="lp-blob"></span>
+        <img class="lp-fl o" src="assets/letter-o.png" alt="">
+        <img class="lp-fl s" src="assets/letter-s.png" alt="">
+        <img class="lp-fl l" src="assets/letter-l.png" alt="">
+      </div>
+    </div>
+  </div>
+
   <!-- ٤. المنتجات -->
   <section id="products" style="padding-top:28px;padding-bottom:8px">
     <div class="lp-wrap">
@@ -460,27 +494,6 @@
 
   <p class="fine">المعاينة توضيحية، والألوان في القطعة الحقيقية ممكن تختلف شوي حسب الإضاءة والشاشة. كل قطعة تنطبع لك خصيصًا والتجهيز من ٥ إلى ٧ أيام.</p>
 </div>
-
-<!-- ١. الواجهة -->
-  <div class="lp-hero">
-    <div class="lp-wrap">
-      <div>
-        <p class="lp-eyebrow">صُنع يدويًا في السعودية</p>
-        <h1>كل حرف<br>فيه فرحة.</h1>
-        <p>حروف منفوخة مطبوعة 3D بالاسم اللي تبينه، خفيفة وآمنة لغرف الأطفال، وبالألوان اللي تختارينها.</p>
-        <div class="lp-cta">
-          <a class="lp-btn lp-dark" href="#design">صممي اسمك</a>
-          <a class="lp-btn lp-line" href="#products">شوفي المنتجات</a>
-        </div>
-        <div class="lp-chips">
-          <span class="lp-chip" id="chipSizes"></span>
-          <span class="lp-chip">ناعم أو مخيوط</span>
-          <span class="lp-chip" id="colorCount"></span>
-        </div>
-      </div>
-      <div class="lp-hero-img"><img src="assets/sol-letters.png" alt="حروف SOL منفوخة باللون الوردي"></div>
-    </div>
-  </div>
 
   <!-- ٢. من نحن -->
   <section class="lp-about" id="about">
