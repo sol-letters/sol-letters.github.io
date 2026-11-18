@@ -117,11 +117,11 @@
   .err{color:#c0392b;font-size:13px;font-weight:700;min-height:0}
   .banner{margin:4px 0 14px;border-radius:24px;overflow:hidden;aspect-ratio:16/9;background:#e9e6df}
   .banner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-  .shapes{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 6px;margin:0 -2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .shapes{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px;padding:4px 2px 6px}
   .shapes::-webkit-scrollbar{display:none}
-  .shp{position:relative;flex:0 0 82px;scroll-snap-align:start;background:var(--card);border-radius:18px;box-shadow:0 0 0 1.5px var(--line) inset;padding:14px 6px 10px;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:box-shadow .15s}
+  .shp{position:relative;scroll-snap-align:start;background:var(--card);border-radius:18px;box-shadow:0 0 0 1.5px var(--line) inset;padding:14px 6px 10px;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:box-shadow .15s}
   .shp.on{box-shadow:0 0 0 2px var(--ink) inset}
-  .shp svg{width:42px;height:42px;display:block;margin:0 auto 6px}
+  .shp img{width:48px;height:48px;object-fit:contain;display:block;margin:0 auto 6px;pointer-events:none}
   .shp.on svg g{fill:var(--ink);stroke:var(--ink)}
   .shp b{display:block;font-size:13px;font-weight:800}
   .shp small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
@@ -639,13 +639,24 @@ const CONFIG = {
   ],
   // الأشكال (السعر للقطعة الواحدة، عدّليه)
   shapes: [
-    { id:"heart",     name:"قلب",     price:15 },
-    { id:"flower",    name:"وردة",    price:15 },
-    { id:"crown",     name:"تاج",     price:15 },
-    { id:"butterfly", name:"فراشة",   price:15 },
-    { id:"bow",       name:"فيونكة",  price:15 },
-    { id:"castle",    name:"قصر",     price:15 },
-    { id:"dino",      name:"ديناصور", price:15 },
+    { id:"cloud", name:"غيمة", price:15, w:240, h:159 },
+    { id:"rocket", name:"صاروخ", price:15, w:201, h:240 },
+    { id:"dino", name:"ديناصور", price:15, w:239, h:240 },
+    { id:"dolphin", name:"دولفين", price:15, w:240, h:226 },
+    { id:"lion", name:"أسد", price:15, w:238, h:240 },
+    { id:"boat", name:"قارب", price:15, w:240, h:189 },
+    { id:"car", name:"سيارة", price:15, w:240, h:143 },
+    { id:"leaf", name:"ورقة شجر", price:15, w:210, h:240 },
+    { id:"octopus", name:"أخطبوط", price:15, w:240, h:220 },
+    { id:"elephant", name:"فيل", price:15, w:240, h:163 },
+    { id:"heart", name:"قلب", price:15, w:231, h:208 },
+    { id:"flower", name:"وردة", price:15, w:240, h:240 },
+    { id:"crown", name:"تاج", price:15, w:240, h:194 },
+    { id:"giraffe", name:"زرافة", price:15, w:137, h:240 },
+    { id:"snake", name:"ثعبان", price:15, w:194, h:218 },
+    { id:"bow", name:"فيونكة", price:15, w:231, h:151 },
+    { id:"butterfly", name:"فراشة", price:15, w:231, h:195 },
+    { id:"palm", name:"نخلة", price:15, w:191, h:240 },
   ],
   walls: ["#f1ece6","#e7dfd3","#f5e4e3","#e2ebef","#e5ebdf","#2b2829"],
   addons: [
@@ -748,7 +759,7 @@ if(shpSamePrice && CONFIG.shapes.length) $("shpNote").textContent=`اختيار�
 CONFIG.shapes.forEach(sh=>{
   const c=document.createElement("div"); c.className="shp"; c.dataset.id=sh.id;
   c.setAttribute("role","button"); c.tabIndex=0; c.setAttribute("aria-label",`إضافة ${sh.name}`);
-  c.innerHTML=`<button class="rm" aria-label="إزالة ${sh.name}">−</button><span class="cnt">٠</span><svg viewBox="0 0 200 200"><g fill="#cfc6bb" stroke="#cfc6bb">${shapeSVG(sh.id)}</g></svg><b>${sh.name}</b>${shpSamePrice?"":`<small>+${toAr(sh.price)} ${cur}</small>`}`;
+  c.innerHTML=`<button class="rm" aria-label="إزالة ${sh.name}">−</button><span class="cnt">٠</span><img src="assets/shapes/${sh.id}.png" alt="" loading="lazy"><b>${sh.name}</b>${shpSamePrice?"":`<small>+${toAr(sh.price)} ${cur}</small>`}`;
   const add=()=>{ state.shapes.push({id:sh.id}); render(SH+state.shapes.length-1); };
   c.onclick=add;
   c.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); add(); } };
@@ -860,26 +871,20 @@ function draw(animate){
   });
   if(!U.length){ minY=FS*.1; maxY=FS; }
   // shapes after the name
-  const sh=(maxY-minY)*.42, sc=sh/200, sy=maxY-sh;
+  const sh=(maxY-minY)*.5;
   if(U.length && S.length) x+=FS*.12-gap;
   S.forEach((o,k)=>{
-    const i=SH+k, st=styleOf(i), fu=pat(st.tex,st.color), sel=state.sel===i;
-    const g=document.createElementNS(NS,"g");
-    const lift=sel?-FS*.08:0;
-    g.setAttribute("transform",`translate(${x} ${sy+lift}) scale(${sc})`);
-    g.setAttribute("filter","url(#puff)");
-    const inner=document.createElementNS(NS,"g");
-    inner.setAttribute("fill",fu); inner.setAttribute("stroke",fu);
-    inner.innerHTML=shapeSVG(o.id);
-    if(animate===i) inner.classList.add("pop");
-    inner.style.cursor="pointer";
-    inner.addEventListener("click",()=>{ state.sel = state.sel===i ? -1 : i; render(); });
-    g.appendChild(inner);
-    if(state.sel>=0 && !sel) g.setAttribute("opacity",".55");
-    svg.appendChild(g);
-    x+=sh+FS*.08;
+    const i=SH+k, c=CONFIG.shapes.find(z=>z.id===o.id)||{w:1,h:1};
+    const hh=sh, ww=sh*c.w/c.h;
+    const im=document.createElementNS(NS,"image");
+    im.setAttribute("href",`assets/shapes/${o.id}.png`);
+    im.setAttribute("x",x); im.setAttribute("y",maxY-hh); im.setAttribute("width",ww); im.setAttribute("height",hh);
+    im.setAttribute("filter","url(#flat)");
+    if(animate===i) im.classList.add("pop");
+    svg.appendChild(im);
+    x+=ww+FS*.06;
   });
-  if(S.length) x-=FS*.08-gap;
+  if(S.length) x-=FS*.06-gap;
   const total=x-gap, px=FS*.22, pt=FS*.16, pb=FS*.3;
   svg.setAttribute("viewBox",`${-px} ${minY-pt} ${total+px*2} ${maxY-minY+pt+pb}`);
 }
@@ -940,7 +945,7 @@ function orderText(){
   if(v("cNote")) C.push(`ملاحظات: ${v("cNote")}`);
   const L=[`السلام عليكم، أبي أطلب حروف اسم ✨`,``,`🔤 الاسم على الحروف: ${state.name.trim()}`,`الارتفاع: ${toAr(sz.cm)} سم`,`عدد الحروف: ${toAr(n)}`,``,`${isRTL()?"الكلمات":"الحروف"}:`];
   U.forEach((u,i)=>{ if(u===" ") return; const st=styleOf(i); L.push(`• ${u}: ${colorName(st.color)} - ${texName(st.tex)}`); });
-  if(state.shapes.length){ L.push(``,`الأشكال:`); state.shapes.forEach((o,k)=>{ const st=styleOf(SH+k); L.push(`• ${shapeName(o.id)}: ${colorName(st.color)} - ${texName(st.tex)}`); }); }
+  if(state.shapes.length){ L.push(``,`الأشكال:`); state.shapes.forEach(o=>L.push(`• ${shapeName(o.id)}`)); }
   L.push(``,`السعر:`,`• ${toAr(n)} حروف × ${toAr(sz.pricePerLetter)} ${cur} = ${toAr(n*sz.pricePerLetter)} ${cur}`);
   if(state.shapes.length) L.push(`• أشكال (${toAr(state.shapes.length)}): ${toAr(shp)} ${cur}`);
   add.forEach(a=>L.push(`• ${a.label}: ${toAr(a.price)} ${cur}`));
