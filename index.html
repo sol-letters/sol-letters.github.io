@@ -293,6 +293,25 @@
       <feComposite in2="o" operator="in" result="sh"/>
       <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <!-- puffy inflated letters, like the SOL render -->
+    <filter id="puff" x="-15%" y="-15%" width="130%" height="145%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="bump"/>
+      <feDiffuseLighting in="bump" surfaceScale="7" diffuseConstant="1" lighting-color="#ffffff" result="diff">
+        <feDistantLight azimuth="235" elevation="60"/>
+      </feDiffuseLighting>
+      <feComposite in="SourceGraphic" in2="diff" operator="arithmetic" k1="1.12" k2="0" k3="0" k4="0" result="shade"/>
+      <feSpecularLighting in="bump" surfaceScale="7" specularConstant=".35" specularExponent="16" lighting-color="#ffffff" result="spec">
+        <feDistantLight azimuth="235" elevation="58"/>
+      </feSpecularLighting>
+      <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
+      <feComposite in="shade" in2="specIn" operator="arithmetic" k1="0" k2="1" k3=".3" k4="0" result="lit"/>
+      <feComposite in="lit" in2="SourceAlpha" operator="in" result="body"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="9" result="sb"/>
+      <feOffset in="sb" dx="4" dy="12" result="so"/>
+      <feFlood flood-color="#2a1d17" flood-opacity=".2"/>
+      <feComposite in2="so" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="body"/></feMerge>
+    </filter>
   </defs>
 </svg>
 
@@ -795,6 +814,7 @@ function draw(animate){
     t.setAttribute("fill",fu);
     if(animate==="all"||animate===i) t.classList.add("pop");
     t.addEventListener("click",()=>{ state.sel = state.sel===i ? -1 : i; render(); });
+    g.setAttribute("filter","url(#puff)");
     g.appendChild(t); svg.appendChild(g);
     return {g,t,i,w:t.getBBox().width};
   });
