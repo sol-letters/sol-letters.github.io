@@ -703,7 +703,7 @@ const texName=id=>CONFIG.textures.find(t=>t.id===id)?.label||"";
 
 function rgb(h){ const n=parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
 /* recolour a shape image to any colour, keeping its 3D shading */
-const SHAPE_L={boat:.773,bow:.722,butterfly:.685,car:.422,castle:.791,cloud:.724,crown:.755,dino:.679,dolphin:.642,elephant:.645,flower:.818,giraffe:.75,heart:.689,leaf:.69,lion:.716,octopus:.679,palm:.641,rocket:.494,snake:.687};
+const SHAPE_L={boat:.773,bow:.722,butterfly:.685,car:.422,castle:.791,cloud:.724,crown:.755,dino:.679,dolphin:.642,elephant:.645,flower:.818,giraffe:.75,heart:.689,leaf:.69,lion:.716,octopus:.679,palm:.664,rocket:.494,snake:.687};
 const tints={};
 function tint(id,hex){
   const fid=`t-${id}-${hex.slice(1)}`;
