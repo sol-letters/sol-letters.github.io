@@ -196,6 +196,8 @@
   @keyframes lp-float{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-14px) rotate(calc(var(--r) + 2deg))}}
   @keyframes lp-morph{0%,100%{border-radius:58% 42% 63% 37% / 45% 58% 42% 55%}50%{border-radius:40% 60% 45% 55% / 60% 40% 60% 40%}}
   @media (prefers-reduced-motion:reduce){.lp-fl,.lp-blob{animation:none}}
+  .lp-sh{position:absolute;height:auto;z-index:0;filter:drop-shadow(0 10px 10px rgba(62,29,26,.14));transform:rotate(var(--r));animation:lp-float var(--t,7s) ease-in-out infinite;animation-delay:var(--d,0s)}
+  @media (prefers-reduced-motion:reduce){.lp-sh{animation:none}}
 
   /* مكان صورة مؤقت */
   .lp-ph{width:100%;height:100%;min-height:180px;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:13px;font-weight:700;
@@ -362,6 +364,14 @@
       </div>
       <div class="lp-hero-img" role="img" aria-label="حروف S O L منفوخة باللون الأصفر">
         <span class="lp-blob"></span>
+        <img class="lp-sh" src="assets/shapes/cloud.png" alt="" style="left:0%;top:3%;width:25%;--r:-6deg;--t:8s;--d:0s">
+        <img class="lp-sh" src="assets/shapes/bow.png" alt="" style="left:27%;top:0%;width:15%;--r:-12deg;--t:6s;--d:-3s">
+        <img class="lp-sh" src="assets/shapes/rocket.png" alt="" style="left:82%;top:1%;width:13%;--r:14deg;--t:7s;--d:-1s">
+        <img class="lp-sh" src="assets/shapes/heart.png" alt="" style="left:86%;top:33%;width:13%;--r:10deg;--t:6.5s;--d:-2s">
+        <img class="lp-sh" src="assets/shapes/palm.png" alt="" style="left:87%;top:60%;width:12%;--r:6deg;--t:8s;--d:-4s">
+        <img class="lp-sh" src="assets/shapes/butterfly.png" alt="" style="left:70%;top:84%;width:17%;--r:12deg;--t:7s;--d:-5s">
+        <img class="lp-sh" src="assets/shapes/crown.png" alt="" style="left:33%;top:85%;width:19%;--r:-8deg;--t:6s;--d:-1.5s">
+        <img class="lp-sh" src="assets/shapes/flower.png" alt="" style="left:6%;top:84%;width:14%;--r:0deg;--t:7.5s;--d:-3.5s">
         <img class="lp-fl o" src="assets/letter-o.png" alt="">
         <img class="lp-fl s" src="assets/letter-s.png" alt="">
         <img class="lp-fl l" src="assets/letter-l.png" alt="">
