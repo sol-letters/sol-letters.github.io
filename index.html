@@ -619,8 +619,6 @@ const CONFIG = {
   // شحن مجاني إذا تعدّى سعر الحروف هذا المبلغ (حطي 0 لإلغائه)
   freeShippingOver: 200,
   sizes: [
-    { id:"6",  cm:6,  pricePerLetter:12 },
-    { id:"8",  cm:8,  pricePerLetter:15 },
     { id:"10", cm:10, pricePerLetter:22 },
     { id:"12", cm:12, pricePerLetter:30 },
     { id:"15", cm:15, pricePerLetter:45 },
@@ -683,7 +681,7 @@ const toAr=n=>String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const cur=CONFIG.currency, FS=200;
 
 const state={
-  name:"", size:"8", wall:"#f1ece6", sel:-1, cart:0,
+  name:"", size:"10", wall:"#f1ece6", sel:-1, cart:0,
   def:{ tex:"smooth", color:"#d8bf94" }, per:[], addons:new Set(), ship:"ship", shapes:[],
 };
 const units=()=>{ const t=state.name.trim(); return !t?[]:(AR.test(t)?t.split(/\s+/):[...t]); };
@@ -1018,7 +1016,7 @@ window.addEventListener("resize",()=>render());
 
 // أقسام صفحة المتجر: تاخذ الأسعار من CONFIG.sizes
 (()=>{ const ar=n=>String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
-  const names={6:"صغير جدًا",8:"صغير",10:"وسط",12:"كبير",15:"كبير جدًا"};
+  const names={10:"صغير",12:"وسط",15:"كبير"};
   const S=CONFIG.sizes.map(s=>({name:names[s.cm]||`${ar(s.cm)} سم`,cm:s.cm,price:s.pricePerLetter}));
   document.getElementById("chipSizes").textContent=`${ar(S.length)} مقاسات: ${S.map(s=>ar(s.cm)).join("، ")} سم`;
   document.getElementById("lettersFrom").innerHTML=`يبدأ من ${ar(Math.min(...S.map(s=>s.price)))} ر.س <small>للحرف</small>`;
