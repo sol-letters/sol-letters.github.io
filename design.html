@@ -509,6 +509,20 @@ function rgb(h){ const n=parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255
 /* recolour a shape image to any colour, keeping its 3D shading */
 const SHAPE_L={boat:.773,bow:.722,butterfly:.685,car:.422,castle:.791,cloud:.724,crown:.755,dino:.679,dolphin:.642,elephant:.645,flower:.818,giraffe:.75,heart:.689,leaf:.69,lion:.716,octopus:.679,palm:.664,rocket:.494,snake:.687};
 const tints={};
+/* صور الحروف الحقيقية (assets/letters/X.webp): العرض ÷ الارتفاع لكل حرف. الحرف اللي ما له صورة يترسم بالخط */
+const LETTER_IMG={A:.863,B:.74,C:.793,D:.783,E:.727,F:.753,G:.997,H:.87,I:.53,J:.79,K:.863,N:.84,O:1.02,S:.807,T:.957,V:1.037,W:1.273,X:1.187,Y:1.11,Z:.957};
+const LETTER_L=.863; /* متوسط سطوع الحروف البيضاء في الصور */
+function tintL(hex){
+  const fid=`tl-${hex.slice(1)}`;
+  if(!tints[fid]){
+    const k=1/LETTER_L, [r,g,b]=rgb(hex).map(v=>v/255), row=c=>`${(c*.299*k).toFixed(4)} ${(c*.587*k).toFixed(4)} ${(c*.114*k).toFixed(4)} 0 0`;
+    const f=document.createElementNS(NS,"filter");
+    f.setAttribute("id",fid); f.setAttribute("x","-20%"); f.setAttribute("y","-20%"); f.setAttribute("width","140%"); f.setAttribute("height","150%"); f.setAttribute("color-interpolation-filters","sRGB");
+    f.innerHTML=`<feColorMatrix in="SourceGraphic" type="matrix" values="${row(r)} ${row(g)} ${row(b)} 0 0 0 1 0" result="c"/><feGaussianBlur in="SourceAlpha" stdDeviation="7" result="b"/><feOffset in="b" dx="4" dy="10" result="o"/><feFlood flood-color="#2a1d17" flood-opacity=".18"/><feComposite in2="o" operator="in" result="sh"/><feMerge><feMergeNode in="sh"/><feMergeNode in="c"/></feMerge>`;
+    $("defs").appendChild(f); tints[fid]=1;
+  }
+  return `url(#${fid})`;
+}
 function tint(id,hex){
   const fid=`t-${id}-${hex.slice(1)}`;
   if(!tints[fid]){
@@ -661,8 +675,44 @@ function draw(animate){
   const weight=rtl?"800":"400";
   const stroke=rtl?FS*.12:FS*.03;
   const gap=rtl?FS*.14:FS*.02;
+  // ارتفاع الحرف الكبير بالخط، عشان صور الحروف تطلع بنفس الحجم ونفس الخط
+  let cap=null;
+  if(!rtl){
+    const m=document.createElementNS(NS,"text"); m.textContent="H";
+    m.setAttribute("font-family",fam); m.setAttribute("font-weight",weight); m.setAttribute("font-size",FS); m.setAttribute("y",FS);
+    svg.appendChild(m); const b=m.getBBox(); svg.removeChild(m);
+    cap={y:b.y+b.height*.04,h:b.height*.92};
+  }
   const items=U.map((u,i)=>{
     if(u===" ") return {space:true,w:FS*.3};
+    const up=u.toUpperCase();
+    if(cap && LETTER_IMG[up]){
+      const s=styleOf(i), w=cap.h*LETTER_IMG[up];
+      const g=document.createElementNS(NS,"g");
+      const im=document.createElementNS(NS,"image");
+      im.setAttribute("href",`assets/letters/${up}.webp`);
+      im.setAttribute("y",cap.y); im.setAttribute("width",w); im.setAttribute("height",cap.h);
+      im.setAttribute("preserveAspectRatio","none");
+      im.setAttribute("filter",tintL(s.color));
+      g.appendChild(im);
+      if(s.tex && s.tex!=="smooth"){
+        const mid=`lm-${i}`, mk=document.createElementNS(NS,"mask");
+        mk.setAttribute("id",mid); mk.setAttribute("style","mask-type:alpha"); mk.setAttribute("maskContentUnits","userSpaceOnUse");
+        const mi=document.createElementNS(NS,"image");
+        mi.setAttribute("href",`assets/letters/${up}.webp`); mi.setAttribute("y",cap.y); mi.setAttribute("width",w); mi.setAttribute("height",cap.h); mi.setAttribute("preserveAspectRatio","none");
+        mk.appendChild(mi); g.appendChild(mk);
+        const r=document.createElementNS(NS,"rect");
+        r.setAttribute("y",cap.y); r.setAttribute("width",w); r.setAttribute("height",cap.h);
+        r.setAttribute("fill",pat(s.tex,s.color)); r.setAttribute("mask",`url(#${mid})`); r.setAttribute("opacity",".5");
+        g.appendChild(r);
+        g._mi=mi;
+      }
+      if(animate==="all"||animate===i) g.classList.add("pop");
+      g.style.cursor="pointer";
+      g.addEventListener("click",()=>{ state.sel = state.sel===i ? -1 : i; render(); });
+      svg.appendChild(g);
+      return {img:true,g,im,i,w};
+    }
     const g=document.createElementNS(NS,"g"), t=document.createElementNS(NS,"text");
     t.textContent=u;
     t.setAttribute("font-family",fam); t.setAttribute("font-weight",weight); t.setAttribute("font-size",FS); t.setAttribute("y",FS);
@@ -678,6 +728,15 @@ function draw(animate){
   let x=0,minY=1e9,maxY=-1e9;
   order.forEach(it=>{
     if(it.space){ x+=it.w; return; }
+    if(it.img){
+      it.g.querySelectorAll("image,rect").forEach(e=>e.setAttribute("x",x));
+      minY=Math.min(minY,cap.y); maxY=Math.max(maxY,cap.y+cap.h);
+      const sel=state.sel===it.i;
+      if(sel) it.g.setAttribute("transform",`translate(0 ${-FS*.08})`);
+      if(state.sel>=0 && !sel) it.g.setAttribute("opacity",".55");
+      x+=it.w+FS*.04;
+      return;
+    }
     it.t.setAttribute("x",x);
     const bb=it.t.getBBox();
     minY=Math.min(minY,bb.y); maxY=Math.max(maxY,bb.y+bb.height);
