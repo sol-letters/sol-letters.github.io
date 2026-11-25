@@ -434,8 +434,8 @@
           <label class="fld"><span>المدينة <i>*</i></span><input id="cCity" type="text" autocomplete="address-level2" placeholder="مثال: الرياض"></label>
           <label class="fld"><span>الحي <i>*</i></span><input id="cDist" type="text" placeholder="مثال: النرجس"></label>
         </div>
-        <label class="fld"><span>الشارع ورقم البيت</span><input id="cStreet" type="text" autocomplete="street-address" placeholder="اختياري"></label>
-        <label class="fld"><span>العنوان الوطني المختصر <i>*</i></span><input id="cShort" type="text" dir="ltr" autocapitalize="characters" maxlength="9" placeholder="مثال: RRRD2929"></label>
+        <label class="fld homeOnly"><span>الشارع ورقم البيت</span><input id="cStreet" type="text" autocomplete="street-address" placeholder="اختياري"></label>
+        <label class="fld homeOnly"><span>العنوان الوطني المختصر <i>*</i></span><input id="cShort" type="text" dir="ltr" autocapitalize="characters" maxlength="9" placeholder="مثال: RRRD2929"></label>
       </div>
       <label class="fld"><span>ملاحظات</span><input id="cNote" type="text" placeholder="أي شي تبين نعرفه (اختياري)"></label>
       <div class="err" id="err"></div>
@@ -472,7 +472,7 @@
   </div>
 </div>
 
-<script src="config.js?v=3f60a6a"></script>
+<script src="config.js?v=ship2"></script>
 <script>
 /* always open at the top of the page, even from a link with #design or after a reload */
 if("scrollRestoration" in history) history.scrollRestoration="manual";
@@ -491,7 +491,7 @@ const cur=CONFIG.currency, FS=200;
 
 const state={
   name:"", size:"10", wall:"#f1ece6", sel:-1, cart:0,
-  def:{ tex:"smooth", color:"#d8bf94" }, per:[], addons:new Set(), ship:"ship", shapes:[],
+  def:{ tex:"smooth", color:"#d8bf94" }, per:[], addons:new Set(), ship:CONFIG.shipping[0].id, shapes:[],
 };
 const units=()=>{ const t=state.name.trim(); return !t?[]:(AR.test(t)?t.split(/\s+/):[...t]); };
 const isRTL=()=>AR.test(state.name);
@@ -784,6 +784,7 @@ function draw(animate){
   svg.setAttribute("viewBox",`${-px} ${minY-pt} ${total+px*2} ${maxY-minY+pt+pb}`);
 }
 
+const isHome=()=>!!(CONFIG.shipping.find(o=>o.id===state.ship)||{}).home;
 function shapeRows(){
   return CONFIG.sizes.map(s=>{ const c=state.shapes.filter(o=>shapeSize(o).id===s.id).length; return c?{label:`${toAr(c)} ${c===1?"شكل":"أشكال"} × ${toAr(s.pricePerLetter)} ${cur} (مقاس ${toAr(s.cm)} سم)`,sum:c*s.pricePerLetter}:null; }).filter(Boolean);
 }
@@ -829,6 +830,7 @@ function render(animate){
     <div class="r"><span>التوصيل (${so.label})</span>${shipTxt}</div>
     <div class="r t"><span>الإجمالي</span><b>${toAr(total)} ${cur}</b></div>`;
   $("addrBox").style.display = state.ship==="pickup" ? "none" : "";
+  document.querySelectorAll(".homeOnly").forEach(e=>e.style.display=isHome()?"":"none");
   document.querySelectorAll(".addon.ship").forEach(b=>{
     const o=CONFIG.shipping.find(x=>x.id===b.dataset.id);
     b.classList.toggle("on",b.dataset.id===state.ship);
@@ -845,8 +847,10 @@ function orderText(){
   const C=[`👤 بيانات العميل:`,`الاسم: ${v("cName")}`,`الجوال: ${v("cPhone")}`];
   if(state.ship!=="pickup"){
     C.push(`المدينة: ${v("cCity")}`,`الحي: ${v("cDist")}`);
-    if(v("cStreet")) C.push(`الشارع: ${v("cStreet")}`);
-    C.push(`العنوان الوطني المختصر: ${v("cShort").replace(/\s/g,"").toUpperCase()}`);
+    if(isHome()){
+      if(v("cStreet")) C.push(`الشارع: ${v("cStreet")}`);
+      C.push(`العنوان الوطني المختصر: ${v("cShort").replace(/\s/g,"").toUpperCase()}`);
+    } else C.push(`الاستلام: من أقرب خزنة ريد بوكس`);
   }
   if(v("cNote")) C.push(`ملاحظات: ${v("cNote")}`);
   const L=[`السلام عليكم، أبي أطلب حروف اسم ✨`,``,`🔤 الاسم على الحروف: ${state.name.trim()}`,`الارتفاع: ${toAr(sz.cm)} سم`,`عدد الحروف: ${toAr(n)}`,``,`${isRTL()?"الكلمات":"الحروف"}:`];
@@ -861,13 +865,13 @@ function orderText(){
   return L.join("\n");
 }
 function validate(){
-  const need=["cName","cPhone"].concat(state.ship!=="pickup"?["cCity","cDist","cShort"]:[]);
+  const need=["cName","cPhone"].concat(state.ship!=="pickup"?["cCity","cDist"].concat(isHome()?["cShort"]:[]):[]);
   let firstBad=null;
   ["cName","cPhone","cCity","cDist","cShort"].forEach(id=>$(id).classList.remove("bad"));
   need.forEach(id=>{ if(!$(id).value.trim()){ $(id).classList.add("bad"); firstBad=firstBad||id; } });
   const ph=$("cPhone").value.replace(/[\s-]/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
   if(ph && !/^(\+?966|0)?5\d{8}$/.test(ph)){ $("cPhone").classList.add("bad"); firstBad=firstBad||"cPhone"; $("err").textContent="رقم الجوال لازم يكون سعودي، مثل 05XXXXXXXX"; }
-  else if(state.ship!=="pickup" && $("cShort").value.trim() && !/^[A-Z]{4}\d{4}$/.test($("cShort").value.replace(/\s/g,"").toUpperCase())){ $("cShort").classList.add("bad"); firstBad=firstBad||"cShort"; $("err").textContent="العنوان الوطني المختصر ٤ حروف و٤ أرقام، مثل RRRD2929"; }
+  else if(isHome() && $("cShort").value.trim() && !/^[A-Z]{4}\d{4}$/.test($("cShort").value.replace(/\s/g,"").toUpperCase())){ $("cShort").classList.add("bad"); firstBad=firstBad||"cShort"; $("err").textContent="العنوان الوطني المختصر ٤ حروف و٤ أرقام، مثل RRRD2929"; }
   else $("err").textContent = firstBad ? "عبّي الخانات اللي عليها نجمة *" : "";
   if(firstBad){ $(firstBad).scrollIntoView({behavior:"smooth",block:"center"}); $(firstBad).focus({preventScroll:true}); return false; }
   return true;
