@@ -690,7 +690,7 @@ function draw(animate){
       const s=styleOf(i), w=cap.h*LETTER_IMG[up];
       const g=document.createElementNS(NS,"g");
       const im=document.createElementNS(NS,"image");
-      im.setAttribute("href",`assets/letters/${up}.webp`);
+      im.setAttribute("href",`assets/letters/${up}.webp?v=2`);
       im.setAttribute("y",cap.y); im.setAttribute("width",w); im.setAttribute("height",cap.h);
       im.setAttribute("preserveAspectRatio","none");
       im.setAttribute("filter",tintL(s.color));
@@ -699,7 +699,7 @@ function draw(animate){
         const mid=`lm-${i}`, mk=document.createElementNS(NS,"mask");
         mk.setAttribute("id",mid); mk.setAttribute("style","mask-type:alpha"); mk.setAttribute("maskContentUnits","userSpaceOnUse");
         const mi=document.createElementNS(NS,"image");
-        mi.setAttribute("href",`assets/letters/${up}.webp`); mi.setAttribute("y",cap.y); mi.setAttribute("width",w); mi.setAttribute("height",cap.h); mi.setAttribute("preserveAspectRatio","none");
+        mi.setAttribute("href",`assets/letters/${up}.webp?v=2`); mi.setAttribute("y",cap.y); mi.setAttribute("width",w); mi.setAttribute("height",cap.h); mi.setAttribute("preserveAspectRatio","none");
         mk.appendChild(mi); g.appendChild(mk);
         const r=document.createElementNS(NS,"rect");
         r.setAttribute("y",cap.y); r.setAttribute("width",w); r.setAttribute("height",cap.h);

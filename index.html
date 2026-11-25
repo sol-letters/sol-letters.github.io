@@ -501,7 +501,7 @@
   document.getElementById("chipSizes").textContent=`${ar(S.length)} مقاسات: ${S.map(s=>ar(s.cm)).join("، ")} سم`;
   document.getElementById("lettersFrom").innerHTML=`يبدأ من ${ar(Math.min(...S.map(s=>s.price)))} ر.س <small>للحرف</small>`;
   const max=Math.max(...S.map(s=>s.cm));
-  document.getElementById("sizeCards").innerHTML=S.map(s=>`<div class="lp-size"><span class="lp-L"><img src="assets/letter-a-real.webp" alt="حرف A مطبوع بمقاس ${ar(s.cm)} سم" style="height:${Math.round(96*s.cm/max)}px;width:auto;filter:drop-shadow(2px 5px 6px rgba(42,29,23,.22))"></span><b>${s.name}</b><span class="lp-cm">${ar(s.cm)} سم</span><div class="lp-pr">${ar(s.price)} ر.س <small>/ حرف</small></div></div>`).join("");
+  document.getElementById("sizeCards").innerHTML=S.map(s=>`<div class="lp-size"><span class="lp-L"><img src="assets/letter-a-real.webp?v=2" alt="حرف A مطبوع بمقاس ${ar(s.cm)} سم" style="height:${Math.round(96*s.cm/max)}px;width:auto;filter:drop-shadow(2px 5px 6px rgba(42,29,23,.22))"></span><b>${s.name}</b><span class="lp-cm">${ar(s.cm)} سم</span><div class="lp-pr">${ar(s.price)} ر.س <small>/ حرف</small></div></div>`).join("");
   const sp=CONFIG.shapes[0]; if(sp) document.getElementById("shapePrice").innerHTML=`${ar(sp.price)} ر.س <small>للشكل</small>`;
   document.getElementById("colorCount").textContent=`${ar(CONFIG.colors.length)} لون`;
 })();
