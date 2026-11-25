@@ -249,6 +249,7 @@
   .lp-prod.lp-wide{grid-column:1/-1;flex-direction:row}
   .lp-prod.lp-wide .lp-img{flex:1;aspect-ratio:auto;min-height:240px}
   .lp-prod.lp-wide .lp-body{flex:1;justify-content:center}
+  .lp-prod.lp-wide .lp-body p{flex:none}
 
   /* صممي اسمك */
   .lp-design{background:var(--soft)}
@@ -273,7 +274,7 @@
   .lp summary{font-weight:800;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px}
   .lp summary::-webkit-details-marker{display:none}
   .lp summary::after{content:"+";font-size:20px;line-height:1}
-  .lp details[open] .lp summary::after{content:"−"}
+  .lp details[open] summary::after{content:"−"}
   .lp details p{margin:10px 0 0;color:var(--muted);font-size:14px}
 
   .lp footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:13px}
@@ -288,7 +289,8 @@
     .lp-hero-img{order:-1;max-width:380px}
     .lp-grid{grid-template-columns:1fr}
     .lp-prod.lp-wide{flex-direction:column}
-    .lp-prod.lp-wide .lp-img{min-height:200px}
+    .lp-prod.lp-wide .lp-img{min-height:0;flex:none;aspect-ratio:4/3}
+    .lp-prod.lp-wide .lp-body{flex:none}
     .lp-steps{grid-template-columns:1fr}
     .lp-design .lp-box{padding:20px}
     .lp-note{grid-template-columns:1fr}
@@ -478,7 +480,7 @@
         <details><summary>من وش مصنوعة الحروف؟</summary><p>من خامة PLA، خفيفة وآمنة، ومطبوعة بطابعة ثلاثية الأبعاد.</p></details>
         <details><summary>وش الفرق بين الناعم والمخيوط؟</summary><p>الناعم سطحه أملس، والمخيوط ملمسه كأنه منسوج بالصوف.</p></details>
         <details><summary>كيف أعلّق الحروف؟</summary><p>تقدرين تضيفين لاصق جداري مع الطلب، وتعلّقينها بدون مسامير.</p></details>
-        <details><summary>هل أقدر أطلب حروف عربية؟</summary><p>[جاوبي حسب اللي تقدمينه.]</p></details>
+        <details><summary>هل أقدر أطلب حروف عربية؟</summary><p>حاليًا نسوي الحروف الإنجليزية بس (A–Z).</p></details>
         <details><summary>كم ياخذ التوصيل؟</summary><p>يوصلك خلال ٢ إلى ٤ أيام بعد التجهيز.</p></details>
       </div>
     </div>
