@@ -588,8 +588,8 @@ CONFIG.addons.forEach(a=>{
   $("addons").appendChild(b);
 });
 
-const shpSamePrice=CONFIG.shapes.every(s=>s.price===CONFIG.shapes[0]?.price);
-if(shpSamePrice && CONFIG.shapes.length) $("shpNote").textContent=`اختياري · ${toAr(CONFIG.shapes[0].price)} ${cur} للشكل`;
+/* الأشكال بنفس مقاس الحروف ونفس سعر الحرف */
+const shpSamePrice=true;
 CONFIG.shapes.forEach(sh=>{
   const c=document.createElement("div"); c.className="shp"; c.dataset.id=sh.id;
   c.setAttribute("role","button"); c.tabIndex=0; c.setAttribute("aria-label",`إضافة ${sh.name}`);
@@ -656,7 +656,7 @@ function price(){
   const n=[...state.name.replace(/\s/g,"")].length;
   const add=CONFIG.addons.filter(a=>state.addons.has(a.id));
   const letters=n*sz.pricePerLetter;
-  const shp=state.shapes.reduce((t,x)=>t+(CONFIG.shapes.find(c=>c.id===x.id)?.price||0),0);
+  const shp=state.shapes.length*sz.pricePerLetter;
   const sub=letters+shp+add.reduce((s,a)=>s+a.price,0);
   const so=CONFIG.shipping.find(o=>o.id===state.ship);
   const free=CONFIG.freeShippingOver>0 && (letters+shp)>=CONFIG.freeShippingOver;
@@ -784,6 +784,7 @@ function render(animate){
   $("tagSize").textContent=`${toAr(sz.cm)} سم`;
   $("tagCount").textContent=`${toAr(n)} ${n===1?"حرف":"حروف"}`;
   $("count").textContent=`${toAr([...state.name].length)} / ${toAr(CONFIG.maxLetters)}`;
+  $("shpNote").textContent=`اختياري · ${toAr(sz.pricePerLetter)} ${cur} للشكل بمقاس ${toAr(sz.cm)} سم`;
   $("from").textContent=`يبدأ من ${toAr(Math.min(...CONFIG.sizes.map(s=>s.pricePerLetter)))} ${cur} للحرف · ${toAr(sz.pricePerLetter)} ${cur} للحرف بمقاس ${toAr(sz.cm)} سم`;
 
   const cs=one?styleOf(state.sel):state.def;
@@ -802,7 +803,7 @@ function render(animate){
   const shipTxt = free ? `<b class="free">مجاني</b>` : (ship ? `<b>${toAr(ship)} ${cur}</b>` : `<b>بدون</b>`);
   $("bill").innerHTML = `
     <div class="r"><span>${toAr(n)} ${n===1?"حرف":"حروف"} × ${toAr(sz.pricePerLetter)} ${cur} (مقاس ${toAr(sz.cm)} سم)</span><b>${toAr(n*sz.pricePerLetter)} ${cur}</b></div>
-    ${state.shapes.length?`<div class="r"><span>أشكال (${toAr(state.shapes.length)})</span><b>${toAr(shp)} ${cur}</b></div>`:""}
+    ${state.shapes.length?`<div class="r"><span>${toAr(state.shapes.length)} ${state.shapes.length===1?"شكل":"أشكال"} × ${toAr(sz.pricePerLetter)} ${cur} (مقاس ${toAr(sz.cm)} سم)</span><b>${toAr(shp)} ${cur}</b></div>`:""}
     ${add.map(a=>`<div class="r"><span>${a.label}</span><b>${toAr(a.price)} ${cur}</b></div>`).join("")}
     <div class="r"><span>التوصيل (${so.label})</span>${shipTxt}</div>
     <div class="r t"><span>الإجمالي</span><b>${toAr(total)} ${cur}</b></div>`;
@@ -831,7 +832,7 @@ function orderText(){
   U.forEach((u,i)=>{ if(u===" ") return; const st=styleOf(i); L.push(`• ${u}: ${colorName(st.color)} - ${texName(st.tex)}`); });
   if(state.shapes.length){ L.push(``,`الأشكال:`); state.shapes.forEach(o=>L.push(`• ${shapeName(o.id)}: ${o.color?colorName(o.color):"لونه الأصلي"}`)); }
   L.push(``,`السعر:`,`• ${toAr(n)} حروف × ${toAr(sz.pricePerLetter)} ${cur} = ${toAr(n*sz.pricePerLetter)} ${cur}`);
-  if(state.shapes.length) L.push(`• أشكال (${toAr(state.shapes.length)}): ${toAr(shp)} ${cur}`);
+  if(state.shapes.length) L.push(`• ${toAr(state.shapes.length)} أشكال × ${toAr(sz.pricePerLetter)} ${cur} = ${toAr(shp)} ${cur}`);
   add.forEach(a=>L.push(`• ${a.label}: ${toAr(a.price)} ${cur}`));
   L.push(`• التوصيل (${so.label}): ${free?"مجاني":(ship?toAr(ship)+" "+cur:"بدون")}`);
   L.push(`الإجمالي: ${toAr(total)} ${cur}`);
