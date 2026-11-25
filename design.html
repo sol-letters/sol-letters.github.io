@@ -510,7 +510,7 @@ function rgb(h){ const n=parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255
 const SHAPE_L={boat:.773,bow:.722,butterfly:.685,car:.422,castle:.791,cloud:.724,crown:.755,dino:.679,dolphin:.642,elephant:.645,flower:.818,giraffe:.75,heart:.689,leaf:.69,lion:.716,octopus:.679,palm:.664,rocket:.494,snake:.687};
 const tints={};
 /* صور الحروف الحقيقية (assets/letters/X.webp): العرض ÷ الارتفاع لكل حرف. الحرف اللي ما له صورة يترسم بالخط */
-const LETTER_IMG={A:.863,B:.74,C:.793,D:.783,E:.727,F:.753,G:.997,H:.87,I:.53,J:.79,K:.863,L:.783,M:.983,N:.84,O:1.02,P:.81,Q:.937,R:.82,S:.807,T:.957,U:1,V:1.037,W:1.273,X:1.187,Y:1.11,Z:.957};
+const LETTER_IMG={A:.94,B:.74,C:.793,D:.783,E:.727,F:.753,G:.997,H:.87,I:.53,J:.79,K:.863,L:.783,M:.983,N:.84,O:1.02,P:.81,Q:.937,R:.82,S:.807,T:.957,U:1,V:1.037,W:1.273,X:1.187,Y:1.11,Z:.957};
 const LETTER_L=.863; /* متوسط سطوع الحروف البيضاء في الصور */
 function tintL(hex){
   const fid=`tl-${hex.slice(1)}`;
